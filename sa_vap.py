@@ -1916,6 +1916,7 @@ class SaVap:
 
         if osm_layer_available == False:
             self.choose_layer(0)
+            
 
     def run_wizard_quickmap0(self):
         self.wizard_clicked = True
