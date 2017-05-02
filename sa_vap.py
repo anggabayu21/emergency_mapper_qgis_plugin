@@ -1906,7 +1906,7 @@ class SaVap:
         self.wizard_clicked = True
         self.run_basemap()
 
-    def basemp_default(self):
+    def basemap_default(self):
         layers = self.iface.legendInterface().layers()
         osm_layer_available = False
         for layer in layers:
@@ -1920,7 +1920,7 @@ class SaVap:
 
     def run_wizard_quickmap0(self):
         self.wizard_clicked = True
-        self.basemp_default()
+        self.basemap_default()
 
         self.wizard_quickmap0_dlg.show()
         self.update_wizard_layers_listView()
