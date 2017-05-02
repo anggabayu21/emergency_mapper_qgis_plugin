@@ -1919,11 +1919,22 @@ class SaVap:
 
     def country_extend(self, idx):
         country = self.country_list[idx]
-        country_json_data = open(resources_path('minimum_needs', country[0].upper()+'.json'))
+        country_json_data = open(resources_path('minimum_needs', country[0]+'.json'))
         data = json.load(country_json_data)
         country_json_data.close()
         extent = data["bbox"]
-        self.crsChanged()
+        wkt = 'POINT(%s %s)' % (extent[0][0],extent[0][1])
+        geom = QgsGeometry.fromWkt(wkt)
+        if len(extent)>1:
+            newExtent = QgsRectangle(extent[0][0],extent[0][1],extent[1][2],extent[1][3]) 
+        else:
+            newExtent = QgsRectangle(geom.centroid().asPoint())
+            newExtent.scale(1, geom.centroid().asPoint())
+        
+        self.setMapCrs(self.coordRefSys(4326))
+        self.canvas.setExtent(newExtent)
+        self.canvas.refresh()   
+        extent = viewport_geo_array(self.iface.mapCanvas())
         self.update_extent_ls(extent)
 
     def run_wizard_quickmap0(self):
@@ -2529,16 +2540,21 @@ class SaVap:
         y_maximum = self.location_search_dlg.y_maximum.value()
         x_minimum = self.location_search_dlg.x_minimum.value()
         x_maximum = self.location_search_dlg.x_maximum.value()
-        extent = [x_minimum, y_minimum, x_maximum, y_maximum]
+
+        extent = QgsRectangle(x_minimum, y_minimum, x_maximum, y_maximum) 
+
+        self.canvas.setExtent(extent)
+        self.canvas.refresh() 
 
         # Validate extent
+        """
         valid_flag = validate_geo_array(extent)
         if not valid_flag:
             message = self.tr(
                 'The bounding box is not valid. Please make sure it is '
                 'valid or check your projection!')
             return
-
+        """
         self.location_search_dlg.close()
 
     def show_building_osm(self):
