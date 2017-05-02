@@ -1916,7 +1916,15 @@ class SaVap:
 
         if osm_layer_available == False:
             self.choose_layer(0)
-            
+
+    def country_extend(self, idx):
+        country = self.country_list[idx]
+        country_json_data = open(resources_path('minimum_needs', country[0].upper()+'.json'))
+        data = json.load(country_json_data)
+        country_json_data.close()
+        extent = data["bbox"]
+        self.crsChanged()
+        self.update_extent_ls(extent)
 
     def run_wizard_quickmap0(self):
         self.wizard_clicked = True
@@ -1924,6 +1932,7 @@ class SaVap:
 
         self.wizard_quickmap0_dlg.show()
         self.update_wizard_layers_listView()
+        self.country_extend(self.wizard_impact0_dlg.country_comboBox.currentIndex())
         
     def run_wizard_quickmap1(self):
         self.wizard_quickmap0_dlg.close()
@@ -2515,6 +2524,21 @@ class SaVap:
             self.update_extent_ls(extent) 
 
     def close_location_search(self):
+        # Get the extent
+        y_minimum = self.location_search_dlg.y_minimum.value()
+        y_maximum = self.location_search_dlg.y_maximum.value()
+        x_minimum = self.location_search_dlg.x_minimum.value()
+        x_maximum = self.location_search_dlg.x_maximum.value()
+        extent = [x_minimum, y_minimum, x_maximum, y_maximum]
+
+        # Validate extent
+        valid_flag = validate_geo_array(extent)
+        if not valid_flag:
+            message = self.tr(
+                'The bounding box is not valid. Please make sure it is '
+                'valid or check your projection!')
+            return
+
         self.location_search_dlg.close()
 
     def show_building_osm(self):
