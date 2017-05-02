@@ -1,0 +1,40 @@
+# This file contains metadata for your plugin. Since 
+# version 2.0 of QGIS this is the proper way to supply 
+# information about a plugin. The old method of 
+# embedding metadata in __init__.py will 
+# is no longer supported since version 2.0.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=Emergency Mapper
+qgisMinimumVersion=2.0
+description=This plugin is to create Rapid Map and Impact Map for emergency response. Currently the plugin can utilize Sentinel Asia Value Added Product that comes as GIS Services.
+version=0.0.1
+author=GIC - AIT
+email=anggabayu@ait.asia
+status=alpha
+
+about=This plugin is to create a map with Sentinel Asia Value Added Product
+
+tracker=http://ims.geoinfo.ait.ac.th:81/bayu/qgis_plugin_adb_sa/issues
+repository=http://ims.geoinfo.ait.ac.th:81/bayu/qgis_plugin_adb_sa
+# End of mandatory metadata
+
+# Recommended items:
+
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=analysis, composer, export, geocoding,sentinel_asia,value_added_product,vap,sa
+
+homepage=http://www.geoinfo.ait.ac.th
+category=Plugins
+icon=icon.png
+# experimental flag
+experimental=False
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
