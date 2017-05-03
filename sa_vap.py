@@ -82,6 +82,10 @@ from safe.utilities.resources import resources_path
 from safe.utilities.gis import is_raster_layer, qgis_version,viewport_geo_array,rectangle_geo_array,validate_geo_array
 from safe.utilities.file_downloader import FileDownloader
 from safe.gui.tools.rectangle_map_tool import RectangleMapTool
+from safe.utilities.osm_downloader import download
+from safe.common.exceptions import (
+    CanceledImportDialogError,
+    FileMissingError)
 from osm_downloader_dialog import OsmDownloaderDialog
 
 from random import randint
@@ -500,6 +504,7 @@ class SaVap:
         self.import_data_dlg.browse_file_btn.clicked.connect(self.select_file_importdata)
         self.import_data_dlg.load_import_data_btn.clicked.connect(self.load_file_importdata)
         self.import_data_dlg.cancel_import_data_btn.clicked.connect(self.close_importdata)
+        self.import_data_dlg.delete_layers_btn.clicked.connect(self.delete_importdata)
         self.import_bm_data_dlg.browse_file_btn.clicked.connect(self.select_file_importbmdata)
         self.import_bm_data_dlg.load_import_data_btn.clicked.connect(self.load_file_importbmdata)
         self.import_bm_data_dlg.cancel_import_data_btn.clicked.connect(self.close_importbmdata)
@@ -564,11 +569,13 @@ class SaVap:
         self.building_osm_dlg.browse_file_btn.clicked.connect(self.select_file_building)
         self.building_osm_dlg.osm_radio.clicked.connect(self.radio_building_click)
         self.building_osm_dlg.local_radio.clicked.connect(self.radio_building_click)
+        self.building_osm_dlg.directory_button.clicked.connect(self.building_dir_map)
         self.road_osm_dlg.ok_btn.clicked.connect(self.load_file_road)
         self.road_osm_dlg.cancel_btn.clicked.connect(self.close_road_osm)
         self.road_osm_dlg.browse_file_btn.clicked.connect(self.select_file_road)
         self.road_osm_dlg.osm_radio.clicked.connect(self.radio_road_click)
         self.road_osm_dlg.local_radio.clicked.connect(self.radio_road_click)
+        self.road_osm_dlg.directory_button.clicked.connect(self.road_dir_map)
 
     def run(self):
         """Run method that loads and starts the plugin"""
@@ -606,17 +613,8 @@ class SaVap:
         # show the dialog
         self.import_data_dlg.show()
         self.import_data_dlg.file_path_lineedit.setText('')
-        #self.file_importdata_clicked = True
-        #self.load_importdata_clicked = True
-        # Run the dialog event loop
-        #result = self.import_data_dlg.exec_()
-
-        # See if OK was pressed
-        #if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-        #    pass
-
+        self.import_data_list = []
+        
     def run_importbmdata(self):
         self.import_bm_data_dlg.show()
         self.import_bm_data_dlg.file_path_lineedit.setText('')    
@@ -625,29 +623,60 @@ class SaVap:
         #if self.file_importdata_clicked:
         filepath = QFileDialog.getOpenFileName()
         self.import_data_dlg.file_path_lineedit.setText(filepath) 
-            #self.file_importdata_clicked = False
+        if self.import_data_dlg.file_path_lineedit.text() != "":
+            self.import_data_list.append(self.import_data_dlg.file_path_lineedit.text())
+            self.update_import_data_listView()
+        
+    def update_import_data_listView(self):  
+        list = self.import_data_dlg.layers_listView
+        self.model_import = QStandardItemModel(list)
+         
+        for data in self.import_data_list:
+            # create an item with a caption
+            item = QStandardItem(data)
+            # add a checkbox to it
+            item.setCheckable(True)
+            # Add the item to the model
+            self.model_import.appendRow(item)
+        # Apply the model to the list view
+        list.setModel(self.model_import)  
+
+    def delete_importdata(self):
+        import_data_list = []
+        i = 0
+        for data in self.import_data_list:
+            if self.model_import.item(i).checkState() != 2:
+                import_data_list.append(data)
+            i += 1 
+        self.import_data_list = import_data_list
+        self.update_import_data_listView()
 
     def load_file_importdata(self):    
         #if self.load_importdata_clicked:
             #self.load_importdata_clicked = False
-        filepath = self.import_data_dlg.file_path_lineedit.text()
-        extention_file = splitext(basename(filepath))[1]
-        filename = splitext(basename(filepath))[0]
-        if extention_file == ".shp" or extention_file == ".geojson" or extention_file == ".kml":
-            layer = self.iface.addVectorLayer(filepath, filename, "ogr")
-        elif extention_file == ".tif":    
-            layer = self.iface.addRasterLayer(filepath, filename)
-        else:
-            QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
-            
-        if not layer:
-            QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
-        else:
-            self.import_data_dlg.close()  
-            if self.wizard_clicked:
-                self.wizard_quickmap_trigger()
-            if self.wizard1_clicked:
-                self.wizard_impact_trigger()    
+        failed_import_file = "" 
+        header_failed_msg = "This file(s) failed to import"   
+        for data in self.import_data_list:    
+            filepath = data
+            extention_file = splitext(basename(filepath))[1]
+            filename = splitext(basename(filepath))[0]
+            if extention_file == ".shp" or extention_file == ".geojson" or extention_file == ".kml":
+                layer = self.iface.addVectorLayer(filepath, filename, "ogr")
+            elif extention_file == ".tif":    
+                layer = self.iface.addRasterLayer(filepath, filename)
+            else:
+                failed_import_file = failed_import_file + ", " + filename
+                #QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
+                
+        if failed_import_file != "":
+            failed_import_file = header_failed_msg + failed_import_file
+            QMessageBox.information(None, "Error:", failed_import_file)
+    
+        self.import_data_dlg.close()  
+        if self.wizard_clicked:
+            self.wizard_quickmap_trigger()
+        if self.wizard1_clicked:
+            self.wizard_impact_trigger()    
 
     def close_importdata(self):
         self.import_data_dlg.close()   
@@ -1579,10 +1608,8 @@ class SaVap:
         self.export_to_jpg_clicked = False
 
     def select_dir_map(self):
-        if self.dir_clicked:
-            filepath = QFileDialog.getExistingDirectory()
-            self.print_dlg.output_directory.setText(filepath) 
-            self.dir_clicked = False     
+        filepath = QFileDialog.getExistingDirectory()
+        self.print_dlg.output_directory.setText(filepath) 
 
     def close_print(self):    
         self.print_dlg.close()
@@ -1966,6 +1993,7 @@ class SaVap:
         if osm_layer_available == False:
             path_layer = resources_path('webservice','ne_110m_land', 'ne_110m_land')
             layer = self.iface.addVectorLayer(path_layer+'.shp', 'World', "ogr")
+            self.change_canvas_proj(layer.crs().authid())
             canvas = self.iface.mapCanvas()
             extent = layer.extent()
             canvas.setExtent(extent)
@@ -1985,9 +2013,14 @@ class SaVap:
             newExtent = QgsRectangle(geom.centroid().asPoint())
             newExtent.scale(1, geom.centroid().asPoint())
         
-        self.setMapCrs(self.coordRefSys(4326))
-        self.canvas.setExtent(newExtent)
-        self.canvas.refresh()   
+        #self.setMapCrs(self.coordRefSys(4326))
+        canvas = self.iface.mapCanvas()
+        canvas.zoomScale(1)
+        canvas.zoomIn()
+        canvas.zoomIn()
+        canvas.zoomIn()
+        canvas.setExtent(newExtent)
+        canvas.refresh()   
         extent = viewport_geo_array(self.iface.mapCanvas())
         self.update_extent_ls(extent)
 
@@ -2403,11 +2436,18 @@ class SaVap:
             return None
         return coordRefSys  
 
-
-
     #search location
     def run_location_search(self):
         self.location_search_dlg.show()
+        y_minimum = self.location_search_dlg.y_minimum.value()
+        y_maximum = self.location_search_dlg.y_maximum.value()
+        x_minimum = self.location_search_dlg.x_minimum.value()
+        x_maximum = self.location_search_dlg.x_maximum.value()
+
+        extent = QgsRectangle(x_minimum, y_minimum, x_maximum, y_maximum) 
+
+        self.canvas.setExtent(extent)
+        self.canvas.refresh() 
 
     def init_location_search(self):
         self.location_search_dlg = LocationSearch()
@@ -2627,52 +2667,239 @@ class SaVap:
         self.building_osm_dlg.file_path_lineedit.setText(filepath) 
 
     def load_file_building(self):    
-        filepath = self.building_osm_dlg.file_path_lineedit.text()
-        extention_file = splitext(basename(filepath))[1]
-        filename = splitext(basename(filepath))[0]
-        if extention_file == ".shp" or extention_file == ".geojson" or extention_file == ".kml":
-            layer = self.iface.addVectorLayer(filepath, filename, "ogr")
-        elif extention_file == ".tif":    
-            layer = self.iface.addRasterLayer(filepath, filename)
+        if self.building_osm_dlg.osm_radio.isChecked() == False:
+            filepath = self.building_osm_dlg.file_path_lineedit.text()
+            extention_file = splitext(basename(filepath))[1]
+            filename = splitext(basename(filepath))[0]
+            if extention_file == ".shp" or extention_file == ".geojson" or extention_file == ".kml":
+                layer = self.iface.addVectorLayer(filepath, filename, "ogr")
+            elif extention_file == ".tif":    
+                layer = self.iface.addRasterLayer(filepath, filename)
+            else:
+                QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
+                
+            if not layer:
+                QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
+            else:
+                self.building_osm_dlg.close()
         else:
-            QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
-            
-        if not layer:
-            QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
-        else:
-            self.building_osm_dlg.close()
+            self.download_osm_building_on_wiz() 
             
     def select_file_road(self):
         filepath = QFileDialog.getOpenFileName()
         self.road_osm_dlg.file_path_lineedit.setText(filepath) 
 
     def load_file_road(self):    
-        filepath = self.road_osm_dlg.file_path_lineedit.text()
-        extention_file = splitext(basename(filepath))[1]
-        filename = splitext(basename(filepath))[0]
-        if extention_file == ".shp" or extention_file == ".geojson" or extention_file == ".kml":
-            layer = self.iface.addVectorLayer(filepath, filename, "ogr")
-        elif extention_file == ".tif":    
-            layer = self.iface.addRasterLayer(filepath, filename)
+        if self.road_osm_dlg.osm_radio.isChecked() == False:
+            filepath = self.road_osm_dlg.file_path_lineedit.text()
+            extention_file = splitext(basename(filepath))[1]
+            filename = splitext(basename(filepath))[0]
+            if extention_file == ".shp" or extention_file == ".geojson" or extention_file == ".kml":
+                layer = self.iface.addVectorLayer(filepath, filename, "ogr")
+            elif extention_file == ".tif":    
+                layer = self.iface.addRasterLayer(filepath, filename)
+            else:
+                QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
+                
+            if not layer:
+                QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
+            else:
+                self.road_osm_dlg.close()
         else:
-            QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
-            
-        if not layer:
-            QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
-        else:
-            self.road_osm_dlg.close()
+            self.download_osm_road_on_wiz()    
 
     def radio_building_click(self):
         if self.building_osm_dlg.osm_radio.isChecked():
             self.building_osm_dlg.browse_file_btn.setDisabled(True)
+            self.building_osm_dlg.directory_button.setDisabled(False)
         else:
             self.building_osm_dlg.browse_file_btn.setDisabled(False)
+            self.building_osm_dlg.directory_button.setDisabled(True)
+
+    def building_dir_map(self):
+        filepath = QFileDialog.getExistingDirectory()
+        self.building_osm_dlg.output_directory.setText(filepath)         
 
     def radio_road_click(self):
         if self.road_osm_dlg.osm_radio.isChecked():
             self.road_osm_dlg.browse_file_btn.setDisabled(True)
+            self.road_osm_dlg.directory_button.setDisabled(False)
         else:
-            self.road_osm_dlg.browse_file_btn.setDisabled(False)        
+            self.road_osm_dlg.browse_file_btn.setDisabled(False) 
+            self.road_osm_dlg.directory_button.setDisabled(True)   
+
+    def road_dir_map(self):
+        filepath = QFileDialog.getExistingDirectory()
+        self.road_osm_dlg.output_directory.setText(filepath)   
+        
+    def download_osm_road_on_wiz(self):
+        try:
+            extent = viewport_geo_array(self.iface.mapCanvas())
+            feature_type = "roads"
+
+            output_directory = self.road_osm_dlg.output_directory.text()
+            output_prefix = "roads"
+            overwrite = True
+            output_base_file_path = self.get_output_base_path(
+                output_directory, output_prefix, feature_type, overwrite)
+
+            self.progress_dialog = QProgressDialog()
+            self.progress_dialog.setAutoClose(False)
+            title = self.tr('Road osm download')
+            self.progress_dialog.setWindowTitle(title)
+
+            # noinspection PyTypeChecker
+            download(
+                feature_type,
+                output_base_file_path,
+                extent,
+                self.progress_dialog)
+
+            try:
+                self.load_shapefile(feature_type, output_base_file_path)
+            except FileMissingError as exception:
+                print exception.message
+                QMessageBox.information(None, "Error:", str("Error download OSM data"))
+
+        except CanceledImportDialogError:
+            # don't show anything because this exception raised
+            # when user canceling the import process directly
+            pass
+        except Exception as exception:  # pylint: disable=broad-except
+            # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
+            QMessageBox.information(None, "Error:", exception.message)
+
+            self.progress_dialog.cancel()
+
+        finally:
+            # Unlock the bounding_box_group
+            self.road_osm_dlg.close() 
+
+
+    def download_osm_building_on_wiz(self):
+        try:
+            extent = viewport_geo_array(self.iface.mapCanvas())
+            feature_type = "buildings"
+
+            output_directory = self.building_osm_dlg.output_directory.text()
+            output_prefix = "buildings"
+            overwrite = True
+            output_base_file_path = self.get_output_base_path(
+                output_directory, output_prefix, feature_type, overwrite)
+
+            self.progress_dialog = QProgressDialog()
+            self.progress_dialog.setAutoClose(False)
+            title = self.tr('Road osm download')
+            self.progress_dialog.setWindowTitle(title)
+
+            # noinspection PyTypeChecker
+            download(
+                feature_type,
+                output_base_file_path,
+                extent,
+                self.progress_dialog)
+
+            try:
+                self.load_shapefile(feature_type, output_base_file_path)
+            except FileMissingError as exception:
+                print exception.message
+                QMessageBox.information(None, "Error:", str("Error download OSM data"))
+
+        except CanceledImportDialogError:
+            # don't show anything because this exception raised
+            # when user canceling the import process directly
+            pass
+        except Exception as exception:  # pylint: disable=broad-except
+            # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
+            QMessageBox.information(None, "Error:", exception.message)
+
+            self.progress_dialog.cancel()
+
+        finally:
+            # Unlock the bounding_box_group
+            self.building_osm_dlg.close()               
+            
+
+    def get_output_base_path(
+            self,
+            output_directory,
+            output_prefix,
+            feature_type,
+            overwrite):
+        
+        path = os.path.join(
+            output_directory, '%s%s' % (output_prefix, feature_type))
+
+        if overwrite:
+
+            # If a shapefile exists, we must remove it (only the .shp)
+            shp = '%s.shp' % path
+            if os.path.isfile(shp):
+                os.remove(shp)
+
+        else:
+            separator = '-'
+            suffix = self.get_unique_file_path_suffix(
+                '%s.shp' % path, separator)
+
+            if suffix:
+                path = os.path.join(output_directory, '%s%s%s%s' % (
+                    output_prefix, feature_type, separator, suffix))
+
+        return path 
+
+    @staticmethod
+    def get_unique_file_path_suffix(file_path, separator='-', i=0):
+        basename = os.path.splitext(file_path)
+        if i != 0:
+            file_path_test = os.path.join(
+                '%s%s%s%s' % (basename[0], separator, i, basename[1]))
+        else:
+            file_path_test = file_path
+
+        if os.path.isfile(file_path_test):
+            return OsmDownloaderDialog.get_unique_file_path_suffix(
+                file_path, separator, i + 1)
+        else:
+            return i  
+
+    def load_shapefile(self, feature_type, base_path):
+        
+        path = '%s.shp' % base_path
+
+        if not os.path.exists(path):
+            message = self.tr(
+                '%s does not exist. The server does not have any data for '
+                'this extent.' % path)
+            raise FileMissingError(message)
+
+        layer = self.iface.addVectorLayer(path, feature_type, 'ogr')
+
+        # Check if it's a building layer and if it's QGIS 2.14 about the 2.5D
+        if qgis_version() >= 21400 and feature_type == 'buildings':
+            layer_scope = QgsExpressionContextUtils.layerScope(layer)
+            if not layer_scope.variable('qgis_25d_height'):
+                QgsExpressionContextUtils.setLayerVariable(
+                    layer, 'qgis_25d_height', 0.0002)
+            if not layer_scope.variable('qgis_25d_angle'):
+                QgsExpressionContextUtils.setLayerVariable(
+                    layer, 'qgis_25d_angle', 70)
+
+        canvas_srid = self.canvas.mapSettings().destinationCrs().srsid()
+        on_the_fly_projection = self.canvas.hasCrsTransformEnabled()
+        if canvas_srid != 4326 and not on_the_fly_projection:
+            if QGis.QGIS_VERSION_INT >= 20400:
+                self.canvas.setCrsTransformEnabled(True)
+            else:
+                display_warning_message_bar(
+                    self.iface,
+                    self.tr('Enable \'on the fly\''),
+                    self.tr(
+                        'Your current projection is different than EPSG:4326. '
+                        'You should enable \'on the fly\' to display '
+                        'correctly your layers')
+                )                 
+                  
 
 
 
