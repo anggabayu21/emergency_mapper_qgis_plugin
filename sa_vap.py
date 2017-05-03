@@ -544,11 +544,12 @@ class SaVap:
         self.wizard_quickmap2_dlg.next_btn.clicked.connect(self.close_wizard_quickmap2)
         self.wizard_quickmap2_dlg.delete_layers_btn.clicked.connect(self.wiz_delete1_layers_btn_click)
         self.wizard_impact0_dlg.next_btn.clicked.connect(self.run_wizard_impact1)
+        self.wizard_impact0_dlg.cancel_btn.clicked.connect(self.close_wizard_impact0)
         self.wizard_impact1_dlg.next_btn.clicked.connect(self.run_wizard_impact3)
         self.wizard_impact1_dlg.back_btn.clicked.connect(self.back_wizard_impact1)
         self.wizard_impact1_dlg.basemap_btn.clicked.connect(self.run_basemap)
         self.wizard_impact1_dlg.vap_btn.clicked.connect(lambda: self.run_loadwebservice('impactmap'))
-        self.wizard_impact1_dlg.osm_btn.clicked.connect(lambda: self.show_osm_downloader('impactmap'))
+        self.wizard_impact1_dlg.osm_btn.clicked.connect(self.select_analysis_data)
         self.wizard_impact1_dlg.geobingan_btn.clicked.connect(self.run_geobingan)
         self.wizard_impact1_dlg.local_btn.clicked.connect(self.run_importdata)
         self.wizard_impact1_dlg.delete_layers_btn.clicked.connect(self.wiz1_delete_layers_btn_click)
@@ -1913,6 +1914,10 @@ class SaVap:
         disaster_list.append("Earthquake")
         disaster_list.append("Landslide")
 
+        analysis_list = []
+        analysis_list.append("Affected Building")
+        analysis_list.append("Affected Population")
+
         self.wizard_quickmap0_dlg.country_comboBox.clear()
         self.wizard_quickmap0_dlg.country_comboBox.addItems(country_cb_list)
 
@@ -1924,6 +1929,9 @@ class SaVap:
 
         self.wizard_impact0_dlg.disaster_type_comboBox.clear()
         self.wizard_impact0_dlg.disaster_type_comboBox.addItems(disaster_list)
+
+        self.wizard_impact0_dlg.analysis_comboBox.clear()
+        self.wizard_impact0_dlg.analysis_comboBox.addItems(analysis_list)
 
         self.road_osm_dlg.browse_file_btn.setDisabled(True)
         self.building_osm_dlg.browse_file_btn.setDisabled(True)
@@ -2015,12 +2023,9 @@ class SaVap:
         
         #self.setMapCrs(self.coordRefSys(4326))
         canvas = self.iface.mapCanvas()
-        canvas.zoomScale(1)
-        canvas.zoomIn()
-        canvas.zoomIn()
-        canvas.zoomIn()
         canvas.setExtent(newExtent)
         canvas.refresh()   
+        canvas.zoomScale(4000)
         extent = viewport_geo_array(self.iface.mapCanvas())
         self.update_extent_ls(extent)
 
@@ -2117,10 +2122,19 @@ class SaVap:
         self.wizard1_clicked = True
         self.wizard_impact0_dlg.show()
         self.update_wizard1_layers_listView()
+
+    def close_wizard_impact0(self):
+        self.wizard_impact0_dlg.close() 
+        self.wizard1_clicked = False    
         
     def run_wizard_impact1(self):
         self.wizard_impact0_dlg.close()
         self.wizard_impact1_dlg.show()
+        print self.wizard_impact0_dlg.analysis_comboBox.currentText() 
+        if self.wizard_impact0_dlg.analysis_comboBox.currentText() == "Affected Building":
+            self.wizard_impact1_dlg.label_data_analysis.setText("Select building data")
+        else:    
+            self.wizard_impact1_dlg.label_data_analysis.setText("Select population data")
             
     def run_wizard_impact2(self):
         self.wizard_impact3_dlg.close()
@@ -2224,7 +2238,13 @@ class SaVap:
         self.show_osm_downloader()            
 
     def close_select_exposure_data(self):
-        self.select_exposure_data_dlg.close()        
+        self.select_exposure_data_dlg.close()   
+
+    def select_analysis_data(self):
+        if self.wizard_impact0_dlg.analysis_comboBox.currentText() == "Affected Building":
+            self.show_building_osm()
+        else:
+            self.run_loadwebservice('impactmap')          
             
     def execute_analysis(self):
         if self.execute_analysis_clicked:
@@ -2439,15 +2459,7 @@ class SaVap:
     #search location
     def run_location_search(self):
         self.location_search_dlg.show()
-        y_minimum = self.location_search_dlg.y_minimum.value()
-        y_maximum = self.location_search_dlg.y_maximum.value()
-        x_minimum = self.location_search_dlg.x_minimum.value()
-        x_maximum = self.location_search_dlg.x_maximum.value()
-
-        extent = QgsRectangle(x_minimum, y_minimum, x_maximum, y_maximum) 
-
-        self.canvas.setExtent(extent)
-        self.canvas.refresh() 
+        self.country_extend(self.wizard_impact0_dlg.country_comboBox.currentIndex())
 
     def init_location_search(self):
         self.location_search_dlg = LocationSearch()
@@ -2628,26 +2640,6 @@ class SaVap:
             self.update_extent_ls(extent) 
 
     def close_location_search(self):
-        # Get the extent
-        y_minimum = self.location_search_dlg.y_minimum.value()
-        y_maximum = self.location_search_dlg.y_maximum.value()
-        x_minimum = self.location_search_dlg.x_minimum.value()
-        x_maximum = self.location_search_dlg.x_maximum.value()
-
-        extent = QgsRectangle(x_minimum, y_minimum, x_maximum, y_maximum) 
-
-        self.canvas.setExtent(extent)
-        self.canvas.refresh() 
-
-        # Validate extent
-        """
-        valid_flag = validate_geo_array(extent)
-        if not valid_flag:
-            message = self.tr(
-                'The bounding box is not valid. Please make sure it is '
-                'valid or check your projection!')
-            return
-        """
         self.location_search_dlg.close()
 
     def show_building_osm(self):
@@ -2687,9 +2679,9 @@ class SaVap:
             
     def select_file_road(self):
         filepath = QFileDialog.getOpenFileName()
-        self.road_osm_dlg.file_path_lineedit.setText(filepath) 
+        self.road_osm_dlg.file_path_lineedit.setText(filepath)
 
-    def load_file_road(self):    
+    def load_file_road(self):
         if self.road_osm_dlg.osm_radio.isChecked() == False:
             filepath = self.road_osm_dlg.file_path_lineedit.text()
             extention_file = splitext(basename(filepath))[1]
@@ -2780,6 +2772,8 @@ class SaVap:
         try:
             extent = viewport_geo_array(self.iface.mapCanvas())
             feature_type = "buildings"
+            if self.wizard1_clicked:
+                feature_type = "building-points"
 
             output_directory = self.building_osm_dlg.output_directory.text()
             output_prefix = "buildings"
