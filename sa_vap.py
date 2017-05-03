@@ -46,6 +46,7 @@ from cacheDB import cacheDB
 from sa_vap_dockwidget import SaVapDockWidget
 # Import the code for the Dialog
 from import_data import ImportData
+from import_bm_data import ImportBMData
 from basemap import Basemap
 from analysis import Analysis
 from print_map import PrintMap
@@ -444,6 +445,7 @@ class SaVap:
             parent=self.iface.mainWindow())
 
         self.geobingan_dlg = Geobingan()
+        self.import_bm_data_dlg = ImportBMData()
 
         self.analysis_content = ""
         self.result_lbl = ""
@@ -498,13 +500,16 @@ class SaVap:
         self.import_data_dlg.browse_file_btn.clicked.connect(self.select_file_importdata)
         self.import_data_dlg.load_import_data_btn.clicked.connect(self.load_file_importdata)
         self.import_data_dlg.cancel_import_data_btn.clicked.connect(self.close_importdata)
+        self.import_bm_data_dlg.browse_file_btn.clicked.connect(self.select_file_importbmdata)
+        self.import_bm_data_dlg.load_import_data_btn.clicked.connect(self.load_file_importbmdata)
+        self.import_bm_data_dlg.cancel_import_data_btn.clicked.connect(self.close_importbmdata)
         self.basemap_dlg.osm_btn.clicked.connect(lambda: self.choose_layer(0))
         self.basemap_dlg.google_street_btn.clicked.connect(lambda: self.choose_layer(1))
         self.basemap_dlg.google_hybrid_btn.clicked.connect(lambda: self.choose_layer(2))
         self.basemap_dlg.google_satellite_btn.clicked.connect(lambda: self.choose_layer(3))
         self.basemap_dlg.bing_road_btn.clicked.connect(lambda: self.choose_layer(4))
         self.basemap_dlg.bing_aerial_btn.clicked.connect(lambda: self.choose_layer(5))
-        self.basemap_dlg.other_btn.clicked.connect(self.run_importdata)
+        self.basemap_dlg.other_btn.clicked.connect(self.run_importbmdata)
         self.analysis_dlg.run_analysis_btn.clicked.connect(self.execute_analysis)
         self.analysis_dlg.cancel_analysis_btn.clicked.connect(self.close_analysis)
         self.print_dlg.print_btn.clicked.connect(self.export_to_pdf)
@@ -554,8 +559,16 @@ class SaVap:
         self.select_exposure_data_dlg.cancel_btn.clicked.connect(self.close_select_exposure_data)
         self.location_search_dlg.capture_button.clicked.connect(self.drag_rectangle_on_map_canvas)
         self.location_search_dlg.ok_btn.clicked.connect(self.close_location_search)
-        self.building_osm_dlg.ok_btn.clicked.connect(self.close_building_osm)
-        self.road_osm_dlg.ok_btn.clicked.connect(self.close_road_osm)
+        self.building_osm_dlg.ok_btn.clicked.connect(self.load_file_building)
+        self.building_osm_dlg.cancel_btn.clicked.connect(self.close_building_osm)
+        self.building_osm_dlg.browse_file_btn.clicked.connect(self.select_file_building)
+        self.building_osm_dlg.osm_radio.clicked.connect(self.radio_building_click)
+        self.building_osm_dlg.local_radio.clicked.connect(self.radio_building_click)
+        self.road_osm_dlg.ok_btn.clicked.connect(self.load_file_road)
+        self.road_osm_dlg.cancel_btn.clicked.connect(self.close_road_osm)
+        self.road_osm_dlg.browse_file_btn.clicked.connect(self.select_file_road)
+        self.road_osm_dlg.osm_radio.clicked.connect(self.radio_road_click)
+        self.road_osm_dlg.local_radio.clicked.connect(self.radio_road_click)
 
     def run(self):
         """Run method that loads and starts the plugin"""
@@ -592,10 +605,9 @@ class SaVap:
         """Run method that performs all the real work"""
         # show the dialog
         self.import_data_dlg.show()
-
         self.import_data_dlg.file_path_lineedit.setText('')
-        self.file_importdata_clicked = True
-        self.load_importdata_clicked = True
+        #self.file_importdata_clicked = True
+        #self.load_importdata_clicked = True
         # Run the dialog event loop
         #result = self.import_data_dlg.exec_()
 
@@ -605,36 +617,68 @@ class SaVap:
             # substitute with your code.
         #    pass
 
+    def run_importbmdata(self):
+        self.import_bm_data_dlg.show()
+        self.import_bm_data_dlg.file_path_lineedit.setText('')    
+
     def select_file_importdata(self):
-        if self.file_importdata_clicked:
-            filepath = QFileDialog.getOpenFileName()
-            self.import_data_dlg.file_path_lineedit.setText(filepath) 
-            self.file_importdata_clicked = False
+        #if self.file_importdata_clicked:
+        filepath = QFileDialog.getOpenFileName()
+        self.import_data_dlg.file_path_lineedit.setText(filepath) 
+            #self.file_importdata_clicked = False
 
     def load_file_importdata(self):    
-        if self.load_importdata_clicked:
-            self.load_importdata_clicked = False
-            filepath = self.import_data_dlg.file_path_lineedit.text()
-            extention_file = splitext(basename(filepath))[1]
-            filename = splitext(basename(filepath))[0]
-            if extention_file == ".shp" or extention_file == ".geojson" or extention_file == ".kml":
-                layer = self.iface.addVectorLayer(filepath, filename, "ogr")
-            elif extention_file == ".tif":    
-                layer = self.iface.addRasterLayer(filepath, filename)
-            else:
-                QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
-                
-            if not layer:
-                QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
-            else:
-                self.import_data_dlg.close()  
-                if self.wizard_clicked:
-                    self.wizard_quickmap_trigger()
-                if self.wizard1_clicked:
-                    self.wizard_impact_trigger()    
+        #if self.load_importdata_clicked:
+            #self.load_importdata_clicked = False
+        filepath = self.import_data_dlg.file_path_lineedit.text()
+        extention_file = splitext(basename(filepath))[1]
+        filename = splitext(basename(filepath))[0]
+        if extention_file == ".shp" or extention_file == ".geojson" or extention_file == ".kml":
+            layer = self.iface.addVectorLayer(filepath, filename, "ogr")
+        elif extention_file == ".tif":    
+            layer = self.iface.addRasterLayer(filepath, filename)
+        else:
+            QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
+            
+        if not layer:
+            QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
+        else:
+            self.import_data_dlg.close()  
+            if self.wizard_clicked:
+                self.wizard_quickmap_trigger()
+            if self.wizard1_clicked:
+                self.wizard_impact_trigger()    
 
     def close_importdata(self):
-        self.import_data_dlg.close()          
+        self.import_data_dlg.close()   
+
+    def select_file_importbmdata(self):
+        filepath = QFileDialog.getOpenFileName()
+        self.import_bm_data_dlg.file_path_lineedit.setText(filepath) 
+
+    def load_file_importbmdata(self):    
+        filepath = self.import_bm_data_dlg.file_path_lineedit.text()
+        extention_file = splitext(basename(filepath))[1]
+        filename = splitext(basename(filepath))[0]
+        if extention_file == ".shp" or extention_file == ".geojson" or extention_file == ".kml":
+            layer = self.iface.addVectorLayer(filepath, filename, "ogr")
+        elif extention_file == ".tif":    
+            layer = self.iface.addRasterLayer(filepath, filename)
+        else:
+            QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
+            
+        if not layer:
+            QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
+        else:
+            self.import_bm_data_dlg.close()
+            self.basemap_dlg.close()  
+            if self.wizard_clicked:
+                self.wizard_quickmap_trigger()
+            if self.wizard1_clicked:
+                self.wizard_impact_trigger()    
+
+    def close_importbmdata(self):
+        self.import_bm_data_dlg.close()              
 
     def run_basemap(self):
         """Run method that performs all the real work"""
@@ -1693,28 +1737,24 @@ class SaVap:
 
     def run_geobingan(self):
         self.geobingan_dlg.show()
-        self.geobingan_download_clicked = True
         
     def geobingan_download_click(self):
-        if self.geobingan_download_clicked:
-            self.geobingan_download_clicked = False
-            
-            self.progress_dialog = QProgressDialog()
-            self.progress_dialog.setAutoClose(False)
-            title = self.tr('geoBingAn Downloader')
-            self.progress_dialog.setWindowTitle(title)
+        self.progress_dialog = QProgressDialog()
+        self.progress_dialog.setAutoClose(False)
+        title = self.tr('geoBingAn Downloader')
+        self.progress_dialog.setWindowTitle(title)
 
-            self.setMapCrs(self.coordRefSys(4326))
-            canvas = self.iface.mapCanvas()
-            bbox_str =  str(canvas.extent().yMinimum())+  "," +str(canvas.extent().xMinimum())+ ","+str(canvas.extent().yMaximum()) +","+str(canvas.extent().xMaximum())  
-            print bbox_str
-            self.download_geobingan_data(bbox_str,self.progress_dialog)
-            self.convert_json_vectorpoint()
-            self.close_geobingan()
-            if self.wizard_clicked:
-                self.wizard_quickmap_trigger()
-            if self.wizard1_clicked:
-                self.wizard_impact_trigger()      
+        self.setMapCrs(self.coordRefSys(4326))
+        canvas = self.iface.mapCanvas()
+        bbox_str =  str(canvas.extent().yMinimum())+  "," +str(canvas.extent().xMinimum())+ ","+str(canvas.extent().yMaximum()) +","+str(canvas.extent().xMaximum())  
+        print bbox_str
+        self.download_geobingan_data(bbox_str,self.progress_dialog)
+        self.convert_json_vectorpoint()
+        self.close_geobingan()
+        if self.wizard_clicked:
+            self.wizard_quickmap_trigger()
+        if self.wizard1_clicked:
+            self.wizard_impact_trigger()      
 
     def download_geobingan_data(self,bbox_str,progress_dialog):
         url = "https://geobingan.info/api/1.2/reports/?bbox="+bbox_str+"&logic=and&num=5000"
@@ -1760,8 +1800,8 @@ class SaVap:
         data = json.load(json_data)
         json_data.close()
         total_data = len(data)
+        total_features = 0
         if total_data > 0:
-
             geobingan_categories_list = []
             for i in range(0,(total_data - 1)):
                 try:
@@ -1796,7 +1836,8 @@ class SaVap:
                         fet["updated_time"] = data[i]["updated_time"]
                         fet["address"] = data[i]["address"]
                         vl.addFeatures( [ fet ] )
-                        feature_count += 1        
+                        feature_count += 1    
+                        total_features += 1    
                 vl.commitChanges()   
                 QgsMapLayerRegistry.instance().addMapLayers([vl])
                 symbols = vl.rendererV2().symbols()
@@ -1807,6 +1848,11 @@ class SaVap:
                 self.total_geobingan_data[category] =  feature_count
                 j += 1
 
+        if total_features > 0:        
+            QMessageBox.information(None, "Success:", str("Success download data for this area"))   
+        else:
+            QMessageBox.information(None, "Failed:", str("No data available for this area"))   
+        
     def close_geobingan(self):
         self.geobingan_dlg.close()  
             
@@ -1851,6 +1897,9 @@ class SaVap:
 
         self.wizard_impact0_dlg.disaster_type_comboBox.clear()
         self.wizard_impact0_dlg.disaster_type_comboBox.addItems(disaster_list)
+
+        self.road_osm_dlg.browse_file_btn.setDisabled(True)
+        self.building_osm_dlg.browse_file_btn.setDisabled(True)
 
     def filter_data_quickmap(self):
         country_cb = str(self.wizard_quickmap0_dlg.country_comboBox.currentText()).lower()
@@ -1911,11 +1960,16 @@ class SaVap:
         osm_layer_available = False
         for layer in layers:
             # create an item with a caption
-            if layer.name() == 'OpenStreetMap':
+            if layer.name() == 'World':
                 osm_layer_available = True
 
         if osm_layer_available == False:
-            self.choose_layer(0)
+            path_layer = resources_path('webservice','ne_110m_land', 'ne_110m_land')
+            layer = self.iface.addVectorLayer(path_layer+'.shp', 'World', "ogr")
+            canvas = self.iface.mapCanvas()
+            extent = layer.extent()
+            canvas.setExtent(extent)
+            canvas.refresh()
 
     def country_extend(self, idx):
         country = self.country_list[idx]
@@ -2498,7 +2552,6 @@ class SaVap:
 
     def update_extent_ls(self, extent):
         """Update extent value in GUI based from an extent.
-
         :param extent: A list in the form [xmin, ymin, xmax, ymax] where all
             coordinates provided are in Geographic / EPSG:4326.
         :type extent: list
@@ -2567,7 +2620,59 @@ class SaVap:
         self.building_osm_dlg.close()
         
     def close_road_osm(self):
-        self.road_osm_dlg.close()              
+        self.road_osm_dlg.close() 
+
+    def select_file_building(self):
+        filepath = QFileDialog.getOpenFileName()
+        self.building_osm_dlg.file_path_lineedit.setText(filepath) 
+
+    def load_file_building(self):    
+        filepath = self.building_osm_dlg.file_path_lineedit.text()
+        extention_file = splitext(basename(filepath))[1]
+        filename = splitext(basename(filepath))[0]
+        if extention_file == ".shp" or extention_file == ".geojson" or extention_file == ".kml":
+            layer = self.iface.addVectorLayer(filepath, filename, "ogr")
+        elif extention_file == ".tif":    
+            layer = self.iface.addRasterLayer(filepath, filename)
+        else:
+            QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
+            
+        if not layer:
+            QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
+        else:
+            self.building_osm_dlg.close()
+            
+    def select_file_road(self):
+        filepath = QFileDialog.getOpenFileName()
+        self.road_osm_dlg.file_path_lineedit.setText(filepath) 
+
+    def load_file_road(self):    
+        filepath = self.road_osm_dlg.file_path_lineedit.text()
+        extention_file = splitext(basename(filepath))[1]
+        filename = splitext(basename(filepath))[0]
+        if extention_file == ".shp" or extention_file == ".geojson" or extention_file == ".kml":
+            layer = self.iface.addVectorLayer(filepath, filename, "ogr")
+        elif extention_file == ".tif":    
+            layer = self.iface.addRasterLayer(filepath, filename)
+        else:
+            QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
+            
+        if not layer:
+            QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
+        else:
+            self.road_osm_dlg.close()
+
+    def radio_building_click(self):
+        if self.building_osm_dlg.osm_radio.isChecked():
+            self.building_osm_dlg.browse_file_btn.setDisabled(True)
+        else:
+            self.building_osm_dlg.browse_file_btn.setDisabled(False)
+
+    def radio_road_click(self):
+        if self.road_osm_dlg.osm_radio.isChecked():
+            self.road_osm_dlg.browse_file_btn.setDisabled(True)
+        else:
+            self.road_osm_dlg.browse_file_btn.setDisabled(False)        
 
 
 
