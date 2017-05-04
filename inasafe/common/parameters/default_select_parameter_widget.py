@@ -7,7 +7,7 @@ from PyQt4.QtGui import (
     QRadioButton, QButtonGroup, QWidget, QLabel)
 from inasafe.utilities.i18n import tr
 
-from safe_extras.parameters.qt_widgets.select_parameter_widget import (
+from inasafe_extras.parameters.qt_widgets.select_parameter_widget import (
     SelectParameterWidget)
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"

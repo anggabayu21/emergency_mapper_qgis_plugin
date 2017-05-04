@@ -5,13 +5,13 @@ import os
 import sys
 PARAMETERS_DIR = os.path.abspath(
     os.path.join(
-        os.path.dirname(__file__), '..', '..', '..', 'safe_extras',
+        os.path.dirname(__file__), '..', '..', '..', 'inasafe_extras',
         'parameters'))
 if PARAMETERS_DIR not in sys.path:
     sys.path.append(PARAMETERS_DIR)
 
-from safe_extras.parameters.float_parameter import FloatParameter
-from safe_extras.parameters.unit import Unit
+from inasafe_extras.parameters.float_parameter import FloatParameter
+from inasafe_extras.parameters.unit import Unit
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"

@@ -28,7 +28,7 @@ from inasafe.common.utilities import get_free_memory
 from inasafe import messaging as m
 from inasafe.messaging import styles
 from inasafe.common.signals import send_dynamic_message, send_static_message
-from safe_extras.pydispatch import dispatcher
+from inasafe_extras.pydispatch import dispatcher
 
 PROGRESS_UPDATE_STYLE = styles.PROGRESS_UPDATE_STYLE
 SUGGESTION_STYLE = styles.GREEN_LEVEL_4_STYLE

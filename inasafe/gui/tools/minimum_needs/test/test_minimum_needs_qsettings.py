@@ -28,7 +28,7 @@ import json
 
 from inasafe.gui.tools.minimum_needs.needs_profile import NeedsProfile
 from inasafe.common.minimum_needs import MinimumNeeds
-from safe_extras.parameters.parameter_exceptions import (
+from inasafe_extras.parameters.parameter_exceptions import (
     InvalidMaximumError,
     ValueOutOfBounds)
 

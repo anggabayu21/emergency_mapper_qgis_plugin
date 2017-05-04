@@ -7,7 +7,7 @@ import qgis  # pylint: disable=unused-import
 # noinspection PyPackageRequirements
 from PyQt4.QtGui import QLabel
 
-from safe_extras.parameters.qt_widgets.float_parameter_widget import (
+from inasafe_extras.parameters.qt_widgets.float_parameter_widget import (
     FloatParameterWidget)
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"

@@ -7,8 +7,8 @@ from inasafe.common.parameters.resource_parameter_widget import (
     ResourceParameterWidget)
 from inasafe.common.parameters.resource_parameter import ResourceParameter
 from inasafe.test.utilities import get_qgis_app
-from safe_extras.parameters.metadata import unit_feet_depth, unit_metres_depth
-from safe_extras.parameters.unit import Unit
+from inasafe_extras.parameters.metadata import unit_feet_depth, unit_metres_depth
+from inasafe_extras.parameters.unit import Unit
 
 QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
 

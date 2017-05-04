@@ -26,7 +26,7 @@ import os
 sys.path.append(os.path.dirname(__file__))
 
 PARAMETER_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), 'safe_extras', 'parameters'))
+    os.path.join(os.path.dirname(__file__), 'inasafe_extras', 'parameters'))
 if PARAMETER_DIR not in sys.path:
     sys.path.append(PARAMETER_DIR)
 

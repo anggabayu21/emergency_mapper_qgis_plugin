@@ -5,7 +5,7 @@ from unittest import TestCase
 
 from inasafe.common.parameters.default_select_parameter import (
     DefaultSelectParameter)
-from safe_extras.parameters.parameter_exceptions import (
+from inasafe_extras.parameters.parameter_exceptions import (
     ValueNotAllowedException)
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"

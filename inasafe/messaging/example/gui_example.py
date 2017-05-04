@@ -23,7 +23,7 @@ import os
 # noinspection PyUnresolvedReferences
 import qgis  # pylint: disable=unused-import
 from PyQt4 import Qt, QtWebKit
-from safe_extras.pydispatch import dispatcher
+from inasafe_extras.pydispatch import dispatcher
 
 from inasafe.messaging import (
     Message,

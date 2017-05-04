@@ -17,7 +17,7 @@ from inasafe.common.parameters.resource_parameter import ResourceParameter
 from inasafe.common.minimum_needs import MinimumNeeds
 from inasafe.utilities.i18n import tr
 from inasafe.utilities.resources import resources_path
-from safe_extras.parameters.text_parameter import TextParameter
+from inasafe_extras.parameters.text_parameter import TextParameter
 
 
 def add_needs_parameters(parameters):

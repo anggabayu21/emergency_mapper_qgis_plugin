@@ -4,7 +4,7 @@
 import unittest
 
 from inasafe.common.parameters.resource_parameter import ResourceParameter
-from safe_extras.parameters.unit import Unit
+from inasafe_extras.parameters.unit import Unit
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"

@@ -23,7 +23,7 @@ from inasafe.messaging import (
     Text,
     ImportantText,
     EmphasizedText)
-from safe_extras.pydispatch import dispatcher
+from inasafe_extras.pydispatch import dispatcher
 
 
 DYNAMIC_MESSAGE_SIGNAL = 'ImpactFunctionMessage'

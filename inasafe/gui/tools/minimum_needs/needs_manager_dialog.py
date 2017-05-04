@@ -41,15 +41,15 @@ from inasafe.messaging import styles
 from inasafe.utilities.i18n import tr
 from inasafe.utilities.resources import (
     resources_path, get_ui_class, html_footer, html_header)
-from safe_extras.parameters.float_parameter import FloatParameter
-from safe_extras.parameters.parameter_exceptions import (
+from inasafe_extras.parameters.float_parameter import FloatParameter
+from inasafe_extras.parameters.parameter_exceptions import (
     ValueOutOfBounds,
     InvalidMaximumError,
     InvalidMinimumError)
-from safe_extras.parameters.qt_widgets.parameter_container import (
+from inasafe_extras.parameters.qt_widgets.parameter_container import (
     ParameterContainer)
-from safe_extras.parameters.string_parameter import StringParameter
-from safe_extras.parameters.text_parameter import TextParameter
+from inasafe_extras.parameters.string_parameter import StringParameter
+from inasafe_extras.parameters.text_parameter import TextParameter
 
 INFO_STYLE = styles.BLUE_LEVEL_4_STYLE
 FORM_CLASS = get_ui_class('needs_manager_dialog_base.ui')
