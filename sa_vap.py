@@ -75,14 +75,14 @@ from qgis.gui import *
 from qgis.core import *
 from os.path import basename, splitext
 
-from safe.common.version import release_status
-from safe.common.exceptions import TranslationLoadError
-from safe.utilities.resources import resources_path
-from safe.utilities.gis import is_raster_layer, qgis_version,viewport_geo_array,rectangle_geo_array,validate_geo_array
-from safe.utilities.file_downloader import FileDownloader
-from safe.gui.tools.rectangle_map_tool import RectangleMapTool
-from safe.utilities.osm_downloader import download
-from safe.common.exceptions import (
+from inasafe.common.version import release_status
+from inasafe.common.exceptions import TranslationLoadError
+from inasafe.utilities.resources import resources_path
+from inasafe.utilities.gis import is_raster_layer, qgis_version,viewport_geo_array,rectangle_geo_array,validate_geo_array
+from inasafe.utilities.file_downloader import FileDownloader
+from inasafe.gui.tools.rectangle_map_tool import RectangleMapTool
+from inasafe.utilities.osm_downloader import download
+from inasafe.common.exceptions import (
     CanceledImportDialogError,
     FileMissingError)
 from osm_downloader_dialog import OsmDownloaderDialog

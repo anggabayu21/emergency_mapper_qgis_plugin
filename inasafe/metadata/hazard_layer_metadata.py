@@ -1,0 +1,58 @@
+# coding=utf-8
+"""Hazard Layer Metadata."""
+
+from inasafe.metadata.generic_layer_metadata import GenericLayerMetadata
+from inasafe.metadata.utils import merge_dictionaries
+
+__copyright__ = "Copyright 2016, The InaSAFE Project"
+__license__ = "GPL version 3"
+__email__ = "info@inasafe.org"
+__revision__ = '4c85bcb847131a3d634744b9ea01083b158493bf'
+
+
+class HazardLayerMetadata(GenericLayerMetadata):
+    """
+    Metadata class for hazard layers
+
+    .. versionadded:: 3.2
+    """
+
+    _standard_properties = {
+        'hazard': (
+            'gmd:identificationInfo/'
+            'gmd:MD_DataIdentification/'
+            'gmd:supplementalInformation/'
+            'inasafe/'
+            'hazard/'
+            'gco:CharacterString'),
+        'hazard_category': (
+            'gmd:identificationInfo/'
+            'gmd:MD_DataIdentification/'
+            'gmd:supplementalInformation/'
+            'inasafe/'
+            'hazard_category/'
+            'gco:CharacterString'),
+        'continuous_hazard_unit': (
+            'gmd:identificationInfo/'
+            'gmd:MD_DataIdentification/'
+            'gmd:supplementalInformation/'
+            'inasafe/'
+            'continuous_hazard_unit/'
+            'gco:CharacterString'),
+        'value_maps': (
+            'gmd:identificationInfo/'
+            'gmd:MD_DataIdentification/'
+            'gmd:supplementalInformation/'
+            'inasafe/'
+            'value_map/'
+            'gco:Dictionary'),
+        'thresholds': (
+            'gmd:identificationInfo/'
+            'gmd:MD_DataIdentification/'
+            'gmd:supplementalInformation/'
+            'inasafe/'
+            'thresholds/'
+            'gco:Dictionary'),
+    }
+    _standard_properties = merge_dictionaries(
+        GenericLayerMetadata._standard_properties, _standard_properties)

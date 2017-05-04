@@ -41,23 +41,23 @@ from PyQt4.QtGui import (
 
 import json
 
-from safe.utilities.gis import qgis_version
-from safe.common.exceptions import (
+from inasafe.utilities.gis import qgis_version
+from inasafe.common.exceptions import (
     CanceledImportDialogError,
     FileMissingError)
-from safe.utilities.osm_downloader import download
-from safe.utilities.gis import (
+from inasafe.utilities.osm_downloader import download
+from inasafe.utilities.gis import (
     viewport_geo_array,
     rectangle_geo_array,
     validate_geo_array)
-from safe.utilities.resources import (
+from inasafe.utilities.resources import (
     html_footer, html_header, get_ui_class, resources_path)
 
-from safe.utilities.qgis_utilities import (
+from inasafe.utilities.qgis_utilities import (
     display_warning_message_box,
     display_warning_message_bar)
-from safe.gui.tools.rectangle_map_tool import RectangleMapTool
-from safe.gui.tools.help.osm_downloader_help import osm_downloader_help
+from inasafe.gui.tools.rectangle_map_tool import RectangleMapTool
+from inasafe.gui.tools.help.osm_downloader_help import osm_downloader_help
 
 
 LOGGER = logging.getLogger('SaVap')
