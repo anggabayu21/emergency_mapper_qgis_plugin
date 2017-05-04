@@ -72,7 +72,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>OpenStreetMap</string>
+    <string>OpenStreetMap (save to)</string>
    </property>
    <property name="checked">
     <bool>true</bool>
@@ -101,7 +101,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Save to...</string>
+    <string>Browse...</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="output_directory">

@@ -64,7 +64,6 @@ from wizard_quickmap_2 import WizardQuickmap2
 from wizard_impact_0 import WizardImpact0
 from wizard_impact_1 import WizardImpact1
 from wizard_impact_2 import WizardImpact2
-from wizard_impact_3 import WizardImpact3
 
 from utilities import resources_path
 
@@ -332,7 +331,6 @@ class SaVap:
         whats_this=None,
         parent=None):
         
-
         # Create the dialog (after translation) and keep reference
         self.print_dlg = PrintMap()
 
@@ -545,7 +543,7 @@ class SaVap:
         self.wizard_quickmap2_dlg.delete_layers_btn.clicked.connect(self.wiz_delete1_layers_btn_click)
         self.wizard_impact0_dlg.next_btn.clicked.connect(self.run_wizard_impact1)
         self.wizard_impact0_dlg.cancel_btn.clicked.connect(self.close_wizard_impact0)
-        self.wizard_impact1_dlg.next_btn.clicked.connect(self.run_wizard_impact3)
+        self.wizard_impact1_dlg.next_btn.clicked.connect(self.run_wizard_impact2)
         self.wizard_impact1_dlg.back_btn.clicked.connect(self.back_wizard_impact1)
         self.wizard_impact1_dlg.basemap_btn.clicked.connect(self.run_basemap)
         self.wizard_impact1_dlg.vap_btn.clicked.connect(lambda: self.run_loadwebservice('impactmap'))
@@ -557,9 +555,6 @@ class SaVap:
         self.wizard_impact2_dlg.export_btn.clicked.connect(self.run_print)
         self.wizard_impact2_dlg.next_btn.clicked.connect(self.close_wizard_impact2)
         self.wizard_impact2_dlg.delete_layers_btn.clicked.connect(self.wiz1_delete1_layers_btn_click)
-        self.wizard_impact3_dlg.back_btn.clicked.connect(self.back_wizard_impact3)
-        self.wizard_impact3_dlg.run_analysis_btn.clicked.connect(self.run_analysis)
-        self.wizard_impact3_dlg.next_btn.clicked.connect(self.run_wizard_impact2)    
         self.select_exposure_data_dlg.osm_btn.clicked.connect(self.wiz_osm_downloader_click)
         self.select_exposure_data_dlg.import_data_btn.clicked.connect(self.wiz_import_data_click)
         self.select_exposure_data_dlg.cancel_btn.clicked.connect(self.close_select_exposure_data)
@@ -1895,11 +1890,9 @@ class SaVap:
         self.wizard_impact0_dlg = WizardImpact0()
         self.wizard_impact1_dlg = WizardImpact1()
         self.wizard_impact2_dlg = WizardImpact2()
-        self.wizard_impact3_dlg = WizardImpact3()
 
         self.building_osm_dlg = BuildingOsm()
         self.road_osm_dlg = RoadOsm()
-        self.wizard_impact3_dlg = WizardImpact3()
 
         self.country_list = [['am','Armenia'],['au','Australia'],['az','Azerbaijan'],['bd','Bangladesh'],['bn','Brunei'],['bt','Bhutan'],['cn','China'],['fj','Fiji'],['id','Indonesia'],['in','India'],['ir','Iran'],['jp','Japan'],['kg','Kyrgyzstan'],['kh','Cambodia'],['kr','Republic of Korea'],['kz','Kazakhstan'],['la','Lao PDR'],['lk','Sri Lanka'],['mm','Myanmar'],['mn','Mongolia'],['mv','Maldives'],['my','Malaysia'],['np','Nepal'],['pg','Papua New Guinea'],['ph','Philippines'],['pk','Pakistan'],['ru','Russian Federation'],['sg','Singapore'],['th','Thailand'],['tj','Tajikistan'],['tw','Taiwan'],['uz','Uzbekistan'],['vn','Vietnam'],['ye','Yemen']]
 
@@ -2137,24 +2130,16 @@ class SaVap:
             self.wizard_impact1_dlg.label_data_analysis.setText("Select population data")
             
     def run_wizard_impact2(self):
-        self.wizard_impact3_dlg.close()
-        self.wizard_impact2_dlg.show()
-        
-    def run_wizard_impact3(self):
         self.wizard_impact1_dlg.close()
-        self.wizard_impact3_dlg.show()
-        
+        self.wizard_impact2_dlg.show()
+            
     def back_wizard_impact1(self):
         self.wizard_impact1_dlg.close()   
         self.run_wizard_impact0() 
 
     def back_wizard_impact2(self):
         self.wizard_impact2_dlg.close()   
-        self.run_wizard_impact3()   
-
-    def back_wizard_impact3(self):
-        self.wizard_impact3_dlg.close()   
-        self.run_wizard_impact1()         
+        self.run_wizard_impact1()   
 
     def close_wizard_impact2(self):
         self.wizard_impact2_dlg.close() 
@@ -2184,12 +2169,10 @@ class SaVap:
     def update_wizard1_layers_listView(self):
         list = self.wizard_impact1_dlg.layers_listView
         list1 = self.wizard_impact2_dlg.layers_listView
-        list2 = self.wizard_impact3_dlg.layers_listView
          
         # Create an empty model for the list's data
         self.model_impact = QStandardItemModel(list)
         self.model1_impact = QStandardItemModel(list1)
-        self.model2_impact = QStandardItemModel(list2)
          
         layers = self.iface.legendInterface().layers()
         layer_list = []
@@ -2207,18 +2190,12 @@ class SaVap:
             item1.setCheckable(True)
             # Add the item to the model
             self.model1_impact.appendRow(item1)
-
-            # create an item with a caption
-            item2 = QStandardItem(layer.name())
-            # Add the item to the model
-            self.model2_impact.appendRow(item2)
         
         #self.model.itemChanged.connect(self.on_wizard_layers_listView_item_changed)
 
         # Apply the model to the list view
         list.setModel(self.model_impact)
         list1.setModel(self.model1_impact)
-        list2.setModel(self.model2_impact) 
         
     def wizard_impact_trigger(self,method_name=''):
         self.update_wizard1_layers_listView() 

@@ -43,7 +43,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Step 2 - Map Selection</string>
+    <string>Step 2 - Run analysis</string>
    </property>
   </widget>
   <widget class="Line" name="line">
@@ -156,12 +156,12 @@
     <rect>
      <x>270</x>
      <y>100</y>
-     <width>291</width>
+     <width>281</width>
      <height>41</height>
     </rect>
    </property>
    <property name="text">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select Value Added Products (VAP) data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select an emergency observation product&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
