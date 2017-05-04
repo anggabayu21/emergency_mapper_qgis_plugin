@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>442</width>
-    <height>217</height>
+    <width>447</width>
+    <height>251</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>210</x>
-     <y>150</y>
+     <y>190</y>
      <width>99</width>
      <height>27</height>
     </rect>
@@ -26,11 +26,11 @@
     <string>OK</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="cancel_analysis_btn">
+  <widget class="QPushButton" name="cancel_btn">
    <property name="geometry">
     <rect>
      <x>320</x>
-     <y>150</y>
+     <y>190</y>
      <width>99</width>
      <height>27</height>
     </rect>
@@ -43,7 +43,7 @@
    <property name="geometry">
     <rect>
      <x>150</x>
-     <y>80</y>
+     <y>120</y>
      <width>270</width>
      <height>27</height>
     </rect>
@@ -53,7 +53,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>80</y>
+     <y>120</y>
      <width>98</width>
      <height>27</height>
     </rect>
@@ -62,7 +62,7 @@
     <string>Browse...</string>
    </property>
   </widget>
-  <widget class="QRadioButton" name="affected_building_radio">
+  <widget class="QRadioButton" name="osm_radio">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -72,23 +72,55 @@
     </rect>
    </property>
    <property name="text">
-    <string>OpenStreetMap</string>
+    <string>OpenStreetMap (save to)</string>
    </property>
    <property name="checked">
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QRadioButton" name="affected_population_radio">
+  <widget class="QRadioButton" name="local_radio">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>50</y>
+     <y>90</y>
      <width>431</width>
      <height>22</height>
     </rect>
    </property>
    <property name="text">
     <string>Local data  (KML, shapefile or geojson)</string>
+   </property>
+  </widget>
+  <widget class="QToolButton" name="directory_button">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>50</y>
+     <width>98</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Browse...</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="output_directory">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>50</y>
+     <width>271</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
  </widget>

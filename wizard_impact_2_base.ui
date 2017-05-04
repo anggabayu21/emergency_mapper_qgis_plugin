@@ -17,13 +17,13 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>100</y>
+     <y>110</y>
      <width>291</width>
      <height>61</height>
     </rect>
    </property>
    <property name="text">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export the map to PDF or JPEG or you can customize the map layout with map composer&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Create map&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -88,7 +88,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Create Map</string>
+    <string>Compose</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">
