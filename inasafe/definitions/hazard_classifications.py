@@ -9,17 +9,17 @@ Minimum value IS NOT included, but maximum value IS included to the range.
 Mathematical expression:
 minimum_value < x <= maximum_value
 """
-from inasafe.definitions.constants import big_number
-from inasafe.definitions import concepts
-from inasafe.utilities.i18n import tr
-from inasafe.definitions.units import (
+from ..definitions.constants import big_number
+from ..definitions import concepts
+from ..utilities.i18n import tr
+from ..definitions.units import (
     unit_centimetres,
     unit_miles_per_hour,
     unit_kilometres_per_hour,
     unit_knots,
     unit_metres_per_second
 )
-from inasafe.definitions.styles import (
+from ..definitions.styles import (
     grey,
     green,
     light_green,
@@ -40,7 +40,7 @@ from inasafe.definitions.styles import (
     MMI_3,
     MMI_2,
     MMI_1)
-from inasafe.definitions.exposure import (
+from ..definitions.exposure import (
     exposure_land_cover,
     exposure_place,
     exposure_population,

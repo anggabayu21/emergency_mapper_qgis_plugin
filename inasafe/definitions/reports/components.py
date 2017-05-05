@@ -4,12 +4,12 @@
 """
 from __future__ import absolute_import
 
-from inasafe.definitions.exposure import (
+from ...definitions.exposure import (
     exposure_structure,
     exposure_road,
     exposure_land_cover,
     exposure_population)
-from inasafe.definitions.reports import (
+from ...definitions.reports import (
     jinja2_component_type,
     qgis_composer_component_type,
     qt_renderer_component_type,
@@ -24,8 +24,8 @@ from inasafe.definitions.reports import (
     template_product_tag,
     qpt_product_tag)
 
-from inasafe.common.utilities import safe_dir
-from inasafe.definitions.fields import (
+from ...common.utilities import safe_dir
+from ...definitions.fields import (
     affected_field,
     total_affected_field,
     total_not_affected_field,
@@ -42,43 +42,43 @@ from inasafe.definitions.fields import (
     adult_displaced_count_field,
     elderly_displaced_count_field,
     exposure_count_field)
-from inasafe.definitions.styles import charcoal_black
-from inasafe.report.extractors.action_notes import (
+from ...definitions.styles import charcoal_black
+from ...report.extractors.action_notes import (
     action_checklist_extractor,
     notes_assumptions_extractor)
-from inasafe.report.extractors.aggregate_postprocessors import \
+from ...report.extractors.aggregate_postprocessors import \
     aggregation_postprocessors_extractor
-from inasafe.report.extractors.aggregate_result import \
+from ...report.extractors.aggregate_result import \
     aggregation_result_extractor
-from inasafe.report.extractors.analysis_detail import analysis_detail_extractor
-from inasafe.report.extractors.analysis_provenance_details import \
+from ...report.extractors.analysis_detail import analysis_detail_extractor
+from ...report.extractors.analysis_provenance_details import \
     analysis_provenance_details_extractor
-from inasafe.report.extractors.analysis_question import \
+from ...report.extractors.analysis_question import \
     analysis_question_extractor
-from inasafe.report.extractors.general_report import general_report_extractor
-from inasafe.report.extractors.composer import qgis_composer_extractor
-from inasafe.report.extractors.impact_table import (
+from ...report.extractors.general_report import general_report_extractor
+from ...report.extractors.composer import qgis_composer_extractor
+from ...report.extractors.impact_table import (
     impact_table_extractor,
     impact_table_pdf_extractor)
-from inasafe.report.extractors.infographics import (
+from ...report.extractors.infographics import (
     population_infographic_extractor,
     infographic_layout_extractor,
     infographic_pdf_extractor)
-from inasafe.report.extractors.minimum_needs import minimum_needs_extractor
-from inasafe.report.extractors.mmi_detail import mmi_detail_extractor
-from inasafe.report.extractors.population_chart import (
+from ...report.extractors.minimum_needs import minimum_needs_extractor
+from ...report.extractors.mmi_detail import mmi_detail_extractor
+from ...report.extractors.population_chart import (
     population_chart_extractor,
     population_chart_to_png_extractor)
-from inasafe.report.processors.default import (
+from ...report.processors.default import (
     qgis_composer_renderer,
     jinja2_renderer,
     qgis_composer_html_renderer,
     qt_svg_to_png_renderer)
-from inasafe.report.report_metadata import (
+from ...report.report_metadata import (
     Jinja2ComponentsMetadata,
     QgisComposerComponentsMetadata)
-from inasafe.utilities.i18n import tr
-from inasafe.utilities.resources import resource_url, resources_path
+from ...utilities.i18n import tr
+from ...utilities.resources import resource_url, resources_path
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"

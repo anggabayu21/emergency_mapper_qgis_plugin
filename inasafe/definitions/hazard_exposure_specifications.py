@@ -2,13 +2,13 @@
 
 """Actions, notes, questions which are specials for a given hazard/exposure."""
 
-from inasafe.utilities.i18n import tr, locale
-from inasafe.definitions.hazard import (
+from ..utilities.i18n import tr, locale
+from ..definitions.hazard import (
     hazard_volcanic_ash,
     hazard_earthquake,
     hazard_flood,
 )
-from inasafe.definitions.exposure import (
+from ..definitions.exposure import (
     exposure_population,
     exposure_road,
 )

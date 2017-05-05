@@ -7,8 +7,8 @@ import sys
 
 from PyQt4.QtCore import QVariant
 
-from inasafe.common.parameters.resource_parameter import ResourceParameter
-from inasafe.gui.tools.minimum_needs.needs_profile import NeedsProfile
+from ..common.parameters.resource_parameter import ResourceParameter
+from ..gui.tools.minimum_needs.needs_profile import NeedsProfile
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"

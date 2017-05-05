@@ -12,7 +12,7 @@ Contact : ole.moller.nielsen@gmail.com
 """
 import unittest
 from collections import OrderedDict
-from inasafe.definitions.fields import (
+from ..definitions.fields import (
     exposure_fields,
     hazard_fields,
     aggregation_fields,

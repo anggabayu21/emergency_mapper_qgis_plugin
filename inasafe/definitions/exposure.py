@@ -1,16 +1,16 @@
 # coding=utf-8
 """Definitions relating to exposure in InaSAFE."""
 
-from inasafe.definitions.concepts import concepts
-from inasafe.definitions.caveats import caveat_incomplete_data
-from inasafe.definitions.units import (
+from ..definitions.concepts import concepts
+from ..definitions.caveats import caveat_incomplete_data
+from ..definitions.units import (
     count_exposure_unit,
     unit_metres,
     unit_square_metres,
     unit_hectares,
     unit_kilometres,
 )
-from inasafe.definitions.fields import (
+from ..definitions.fields import (
     adult_count_field,
     elderly_count_field,
     exposure_fields,
@@ -19,15 +19,15 @@ from inasafe.definitions.fields import (
     youth_count_field,
     population_count_field,
     exposure_type_field)
-from inasafe.definitions.layer_modes import (
+from ..definitions.layer_modes import (
     layer_mode_continuous, layer_mode_classified)
-from inasafe.definitions.exposure_classifications import (
+from ..definitions.exposure_classifications import (
     generic_place_classes,
     generic_road_classes,
     generic_structure_classes,
     generic_landcover_classes,
     badan_geologi_landcover_classes)
-from inasafe.utilities.i18n import tr
+from ..utilities.i18n import tr
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"

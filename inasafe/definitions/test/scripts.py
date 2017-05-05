@@ -1,4 +1,4 @@
-from inasafe.definitions.test.test_fields import all_fields
+from ..definitions.test.test_fields import all_fields
 
 
 def generate_field_table():

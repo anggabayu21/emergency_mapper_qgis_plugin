@@ -4,8 +4,8 @@
 from copy import deepcopy
 
 from inasafe import definitions
-from inasafe.definitions import fields
-from inasafe.definitions import (
+from ..definitions import fields
+from ..definitions import (
     layer_purposes,
     hazard_all,
     exposure_all,

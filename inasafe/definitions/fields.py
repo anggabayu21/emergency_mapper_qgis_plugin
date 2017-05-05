@@ -4,17 +4,17 @@
 
 from PyQt4.QtCore import QVariant
 
-from inasafe.utilities.i18n import tr
-from inasafe.definitions.constants import (
+from ..utilities.i18n import tr
+from ..definitions.constants import (
     qvariant_whole_numbers, qvariant_numbers)
-from inasafe.definitions.default_values import (
+from ..definitions.default_values import (
     female_ratio_default_value,
     feature_rate_default_value,
     youth_ratio_default_value,
     adult_ratio_default_value,
     elderly_ratio_default_value
 )
-from inasafe.definitions import concepts
+from ..definitions import concepts
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"
@@ -1402,7 +1402,7 @@ analysis_fields = [
 ]
 
 # Add also minimum needs fields
-from inasafe.definitions.minimum_needs import minimum_needs_fields  # noqa
+from ..definitions.minimum_needs import minimum_needs_fields  # noqa
 count_fields = [
     feature_value_field,
     population_count_field,

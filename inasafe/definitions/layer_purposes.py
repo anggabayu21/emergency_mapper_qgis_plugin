@@ -1,14 +1,14 @@
 # coding=utf-8
 
 """Definitions relating to exposure."""
-from inasafe.definitions.concepts import concepts
-from inasafe.definitions.layer_geometry import (
+from ..definitions.concepts import concepts
+from ..definitions.layer_geometry import (
     layer_geometry_raster,
     layer_geometry_line,
     layer_geometry_point,
     layer_geometry_polygon
 )
-from inasafe.utilities.i18n import tr
+from ..utilities.i18n import tr
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"

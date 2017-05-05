@@ -2,7 +2,7 @@
 
 """Definitions relating to hazards."""
 
-from inasafe.definitions.hazard_classifications import (
+from ..definitions.hazard_classifications import (
     generic_hazard_classes,
     volcano_hazard_classes,
     earthquake_mmi_scale,
@@ -15,10 +15,10 @@ from inasafe.definitions.hazard_classifications import (
     ash_hazard_classes,
     cyclone_au_bom_hazard_classes,
     cyclone_sshws_hazard_classes)
-from inasafe.definitions.caveats import (
+from ..definitions.caveats import (
     caveat_simulation, caveat_local_conditions, caveat_analysis_extent,)
-from inasafe.definitions.concepts import concepts
-from inasafe.definitions.units import (
+from ..definitions.concepts import concepts
+from ..definitions.units import (
     unit_feet,
     unit_generic,
     unit_kilogram_per_meter_square,
@@ -31,17 +31,17 @@ from inasafe.definitions.units import (
     unit_kilometres_per_hour,
     unit_knots,
     unit_metres_per_second)
-from inasafe.definitions.layer_modes import (
+from ..definitions.layer_modes import (
     layer_mode_classified, layer_mode_continuous)
-from inasafe.definitions.fields import (
+from ..definitions.fields import (
     hazard_name_field, hazard_fields, hazard_value_field)
-from inasafe.definitions.earthquake import EARTHQUAKE_FUNCTIONS
-from inasafe.definitions.exposure import (
+from ..definitions.earthquake import EARTHQUAKE_FUNCTIONS
+from ..definitions.exposure import (
     exposure_place,
     exposure_land_cover,
     exposure_road,
     exposure_population)
-from inasafe.utilities.i18n import tr
+from ..utilities.i18n import tr
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"

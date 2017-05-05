@@ -1,7 +1,7 @@
 # coding=utf-8
 """Definitions relating to default setting of fresh InaSAFE."""
 from os.path import expanduser, abspath, join
-# from inasafe.utilities.resources import resources_path
+# from ..utilities.resources import resources_path
 
 inasafe_default_settings = {
     'visibleLayersOnlyFlag': True,

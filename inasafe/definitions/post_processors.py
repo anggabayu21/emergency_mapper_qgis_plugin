@@ -10,11 +10,11 @@ from collections import OrderedDict
 
 from PyQt4.QtCore import QPyNullVariant
 
-from inasafe.definitions.hazard_classifications import not_exposed_class
-from inasafe.definitions.exposure import exposure_population
-from inasafe.definitions.minimum_needs import minimum_needs_fields
-from inasafe.utilities.i18n import tr
-from inasafe.definitions.fields import (
+from ..definitions.hazard_classifications import not_exposed_class
+from ..definitions.exposure import exposure_population
+from ..definitions.minimum_needs import minimum_needs_fields
+from ..utilities.i18n import tr
+from ..definitions.fields import (
     population_displacement_ratio_field,
     displaced_field,
     female_ratio_field,
@@ -36,8 +36,8 @@ from inasafe.definitions.fields import (
     hygiene_packs_count_field,
     additional_rice_count_field,
 )
-from inasafe.definitions import concepts
-from inasafe.definitions.hazard_classifications import hazard_classes_all
+from ..definitions import concepts
+from ..definitions.hazard_classifications import hazard_classes_all
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"

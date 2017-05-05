@@ -4,7 +4,7 @@ import unittest
 from copy import deepcopy
 from inasafe import definitions
 
-from inasafe.definitions import (
+from ..definitions import (
     hazard_flood,
     hazard_tsunami,
     hazard_earthquake,
@@ -36,9 +36,9 @@ from inasafe.definitions import (
     cyclone_au_bom_hazard_classes,
     unit_knots
 )
-from inasafe.definitions.hazard import hazard_cyclone
+from ..definitions.hazard import hazard_cyclone
 
-from inasafe.definitions.utilities import (
+from ..definitions.utilities import (
     definition,
     purposes_for_layer,
     hazards_for_layer,
