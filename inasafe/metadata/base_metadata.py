@@ -10,7 +10,7 @@ Contact : ole.moller.nielsen@gmail.com
      the Free Software Foundation; either version 2 of the License, or
      (at your option) any later version.
 """
-from inasafe.metadata.encoder import MetadataEncoder
+from ..metadata.encoder import MetadataEncoder
 
 __author__ = 'marco@opengis.ch'
 __revision__ = '4c85bcb847131a3d634744b9ea01083b158493bf'
@@ -27,9 +27,9 @@ import json
 import os
 from xml.etree import ElementTree
 
-from inasafe.common.exceptions import MetadataReadError, HashNotFoundError
-from inasafe.metadata.metadata_db_io import MetadataDbIO
-from inasafe.metadata.utils import (
+from ..common.exceptions import MetadataReadError, HashNotFoundError
+from ..metadata.metadata_db_io import MetadataDbIO
+from ..metadata.utils import (
     METADATA_XML_TEMPLATE,
     TYPE_CONVERSIONS,
     XML_NS,
@@ -37,8 +37,8 @@ from inasafe.metadata.utils import (
     read_property_from_xml,
     reading_ancillary_files
 )
-from inasafe.utilities.i18n import tr
-from inasafe.definitions.constants import multipart_polygon_key
+from ..utilities.i18n import tr
+from ..definitions.constants import multipart_polygon_key
 
 
 class BaseMetadata(object):

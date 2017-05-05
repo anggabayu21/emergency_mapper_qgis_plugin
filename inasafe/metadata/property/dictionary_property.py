@@ -23,8 +23,8 @@ from types import NoneType
 from PyQt4.QtCore import QUrl, QDate, QDateTime, Qt
 from datetime import datetime, date
 
-from inasafe.common.exceptions import MetadataCastError
-from inasafe.metadata.property import BaseProperty
+from ...common.exceptions import MetadataCastError
+from ...metadata.property import BaseProperty
 
 
 class DictionaryProperty(BaseProperty):

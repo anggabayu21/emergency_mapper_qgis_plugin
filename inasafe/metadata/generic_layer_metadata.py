@@ -18,8 +18,8 @@ __copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
                  'Disaster Reduction')
 
 from xml.etree import ElementTree
-from inasafe.metadata import BaseMetadata
-from inasafe.metadata.utils import reading_ancillary_files, prettify_xml
+from ..metadata import BaseMetadata
+from ..metadata.utils import reading_ancillary_files, prettify_xml
 
 
 class GenericLayerMetadata(BaseMetadata):
@@ -39,7 +39,7 @@ class GenericLayerMetadata(BaseMetadata):
             'gmd:supplementalInformation/'
             'gco:CharacterString')
     }
-    from inasafe.metadata.utils import merge_dictionaries
+    from ..metadata.utils import merge_dictionaries
     _standard_properties = merge_dictionaries(
         # change BaseMetadata to GenericLayerMetadata in subclasses
         BaseMetadata._standard_properties, _standard_properties)

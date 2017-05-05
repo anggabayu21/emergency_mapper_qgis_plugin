@@ -23,7 +23,7 @@ import os
 from contextlib import contextmanager
 from xml.dom.minidom import parseString
 from xml.etree import ElementTree
-from inasafe.metadata.property import (
+from ..metadata.property import (
     CharacterStringProperty,
     DateProperty,
     UrlProperty,

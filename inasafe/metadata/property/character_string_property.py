@@ -11,7 +11,7 @@ Contact : ole.moller.nielsen@gmail.com
      (at your option) any later version.
 """
 from types import NoneType
-from inasafe.metadata.property import BaseProperty
+from ...metadata.property import BaseProperty
 
 __author__ = 'marco@opengis.ch'
 __revision__ = '4c85bcb847131a3d634744b9ea01083b158493bf'

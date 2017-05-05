@@ -6,8 +6,8 @@ from types import NoneType
 
 from PyQt4.QtCore import QDate, Qt, QDateTime
 
-from inasafe.common.exceptions import MetadataCastError
-from inasafe.metadata.property import BaseProperty
+from ...common.exceptions import MetadataCastError
+from ...metadata.property import BaseProperty
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"

@@ -1,8 +1,8 @@
 # coding=utf-8
 """Aggregation Layer Metadata"""
 
-from inasafe.metadata.generic_layer_metadata import GenericLayerMetadata
-from inasafe.metadata.utils import merge_dictionaries
+from ..metadata.generic_layer_metadata import GenericLayerMetadata
+from ..metadata.utils import merge_dictionaries
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"

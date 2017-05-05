@@ -20,9 +20,9 @@ __copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
 
 from xml.etree.ElementTree import Element, tostring
 
-from inasafe.common.exceptions import InvalidProvenanceDataError
-from inasafe.metadata.provenance.provenance_step import ProvenanceStep
-from inasafe.utilities.unicode import get_unicode
+from ...common.exceptions import InvalidProvenanceDataError
+from ...metadata.provenance.provenance_step import ProvenanceStep
+from ...utilities.unicode import get_unicode
 
 
 class IFProvenanceStep(ProvenanceStep):

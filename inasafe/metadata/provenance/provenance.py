@@ -18,8 +18,8 @@ __copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
                  'Disaster Reduction')
 
 
-from inasafe.metadata.provenance import ProvenanceStep
-from inasafe.metadata.provenance import IFProvenanceStep
+from ...metadata.provenance import ProvenanceStep
+from ...metadata.provenance import IFProvenanceStep
 
 
 class Provenance(object):

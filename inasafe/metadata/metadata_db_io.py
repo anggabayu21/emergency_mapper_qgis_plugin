@@ -18,7 +18,7 @@ from sqlite3 import OperationalError
 from qgis.core import QgsApplication
 # noinspection PyPackageRequirements
 from PyQt4.QtCore import QObject, QSettings
-from inasafe.common.exceptions import (
+from ..common.exceptions import (
     HashNotFoundError,
     UnsupportedProviderError)
 

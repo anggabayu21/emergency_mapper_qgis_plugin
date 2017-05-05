@@ -18,6 +18,6 @@ __copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
                  'Disaster Reduction')
 
 # expose for nicer imports
-from inasafe.metadata.provenance.provenance_step import ProvenanceStep
-from inasafe.metadata.provenance.if_provenance_step import IFProvenanceStep
-from inasafe.metadata.provenance.provenance import Provenance
+from ...metadata.provenance.provenance_step import ProvenanceStep
+from ...metadata.provenance.if_provenance_step import IFProvenanceStep
+from ...metadata.provenance.provenance import Provenance

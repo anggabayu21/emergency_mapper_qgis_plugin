@@ -19,12 +19,12 @@ __copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
 
 import json
 from xml.etree import ElementTree
-from inasafe.metadata import BaseMetadata
-from inasafe.metadata.provenance import Provenance
-from inasafe.metadata.utils import reading_ancillary_files, XML_NS, prettify_xml
-from inasafe.metadata.utils import merge_dictionaries
+from ..metadata import BaseMetadata
+from ..metadata.provenance import Provenance
+from ..metadata.utils import reading_ancillary_files, XML_NS, prettify_xml
+from ..metadata.utils import merge_dictionaries
 
-from inasafe.metadata.encoder import MetadataEncoder
+from ..metadata.encoder import MetadataEncoder
 
 
 class ExposureSummaryLayerMetadata(BaseMetadata):
@@ -42,7 +42,7 @@ class ExposureSummaryLayerMetadata(BaseMetadata):
             'gmd:supplementalInformation/'
             'gco:CharacterString')
     }
-    from inasafe.metadata.utils import merge_dictionaries
+    from ..metadata.utils import merge_dictionaries
     _standard_properties = merge_dictionaries(
         BaseMetadata._standard_properties, _standard_properties)
 
@@ -243,7 +243,7 @@ class ExposureSummaryLayerMetadata(BaseMetadata):
 
             if 'IF Provenance' in title:
                 data = {}
-                from inasafe.metadata.provenance import IFProvenanceStep
+                from ..metadata.provenance import IFProvenanceStep
                 keys = IFProvenanceStep.impact_functions_fields
                 for key in keys:
                     value = step.find(key)

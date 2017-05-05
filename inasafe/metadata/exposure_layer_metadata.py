@@ -17,8 +17,8 @@ __date__ = '27/05/2015'
 __copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
                  'Disaster Reduction')
 
-from inasafe.metadata.generic_layer_metadata import GenericLayerMetadata
-from inasafe.metadata.utils import merge_dictionaries
+from ..metadata.generic_layer_metadata import GenericLayerMetadata
+from ..metadata.utils import merge_dictionaries
 
 
 class ExposureLayerMetadata(GenericLayerMetadata):

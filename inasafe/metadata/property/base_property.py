@@ -18,7 +18,7 @@ __copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
                  'Disaster Reduction')
 
 import abc
-from inasafe.common.exceptions import MetadataInvalidPathError, MetadataCastError
+from ...common.exceptions import MetadataInvalidPathError, MetadataCastError
 
 
 class BaseProperty(object):

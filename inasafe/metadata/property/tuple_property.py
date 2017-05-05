@@ -21,8 +21,8 @@ __copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
 import json
 from types import NoneType
 
-from inasafe.common.exceptions import MetadataCastError
-from inasafe.metadata.property import BaseProperty
+from ...common.exceptions import MetadataCastError
+from ...metadata.property import BaseProperty
 
 
 class TupleProperty(BaseProperty):
