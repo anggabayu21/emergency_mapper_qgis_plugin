@@ -26,7 +26,7 @@ import qgis  # pylint: disable=unused-import
 from PyQt4.QtCore import QUrl
 # These all apply to heading elements
 
-from inasafe.utilities.resources import resources_path
+from ..utilities.resources import resources_path
 
 __author__ = 'tim@kartoza.com'
 __revision__ = '4c85bcb847131a3d634744b9ea01083b158493bf'
