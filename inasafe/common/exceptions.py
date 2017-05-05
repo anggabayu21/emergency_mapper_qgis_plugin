@@ -14,7 +14,7 @@ Contact : ole.moller.nielsen@gmail.com
 
 """
 
-from ..utilities.unicode_ import get_unicode,get_string
+from ..utilities.unicode import get_unicode,get_string
 #import get_unicode, get_string
 from ..messaging.item.message_element import MessageElement
 
