@@ -17,7 +17,7 @@ __copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
                  'Disaster Reduction')
 
 from PyQt4.QtCore import QPyNullVariant
-from inasafe.utilities.i18n import tr
+from ...utilities.i18n import tr
 
 from message_element import MessageElement
 from exceptions import InvalidMessageItemError

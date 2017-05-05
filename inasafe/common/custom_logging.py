@@ -28,8 +28,8 @@ from raven.handlers.logging import SentryHandler
 # noinspection PyUnresolvedReferences,PyPackageRequirements
 from raven import Client
 # pylint: enable=F0401
-from inasafe.common.utilities import log_file_path
-from inasafe.utilities.i18n import tr
+from ..common.utilities import log_file_path
+from ..utilities.i18n import tr
 
 __author__ = 'tim@kartoza.com'
 __revision__ = '4c85bcb847131a3d634744b9ea01083b158493bf'

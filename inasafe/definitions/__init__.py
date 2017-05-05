@@ -7,23 +7,23 @@ __license__ = "GPL version 3"
 __email__ = "info@inasafe.org"
 __revision__ = '4c85bcb847131a3d634744b9ea01083b158493bf'
 
-from inasafe.definitions.analysis_steps import *
-from inasafe.definitions.caveats import *
-from inasafe.definitions.concepts import *
-from inasafe.definitions.constants import *
-from inasafe.definitions.default_values import *
-from inasafe.definitions.exposure import *
-from inasafe.definitions.exposure_classifications import *
-from inasafe.definitions.fields import *
-from inasafe.definitions.hazard import *
-from inasafe.definitions.hazard_category import *
-from inasafe.definitions.hazard_classifications import *
-from inasafe.definitions.layer_geometry import *
-from inasafe.definitions.layer_modes import *
-from inasafe.definitions.layer_purposes import *
-from inasafe.definitions.messages import *
-from inasafe.definitions.minimum_needs import *
-from inasafe.definitions.post_processors import *
-from inasafe.definitions.units import *
-from inasafe.definitions.versions import *
-from inasafe.definitions.reports import *
+from analysis_steps import *
+from caveats import *
+from concepts import *
+from constants import *
+from default_values import *
+from exposure import *
+from exposure_classifications import *
+from fields import *
+from hazard import *
+from hazard_category import *
+from hazard_classifications import *
+from layer_geometry import *
+from layer_modes import *
+from layer_purposes import *
+from messages import *
+from minimum_needs import *
+from post_processors import *
+from units import *
+from versions import *
+from .reports import *

@@ -5,9 +5,9 @@ from PyQt4.QtCore import Qt
 from PyQt4.QtGui import (
     QHBoxLayout, QGridLayout, QDoubleSpinBox,
     QRadioButton, QButtonGroup, QWidget, QLabel)
-from inasafe.utilities.i18n import tr
+from ...utilities.i18n import tr
 
-from inasafe_extras.parameters.qt_widgets.select_parameter_widget import (
+from ....inasafe_extras.parameters.qt_widgets.select_parameter_widget import (
     SelectParameterWidget)
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"

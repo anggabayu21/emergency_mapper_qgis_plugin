@@ -12,7 +12,7 @@ import json
 from os.path import exists, dirname
 from os import remove
 
-from inasafe.utilities.i18n import tr
+from ..utilities.i18n import tr
 
 
 class MinimumNeeds(object):

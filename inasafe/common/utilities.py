@@ -21,8 +21,8 @@ from qgis.core import (
     QgsGeometry,
     QgsPoint)
 
-from inasafe.common.exceptions import VerificationError
-from inasafe.utilities.rounding import (
+from ..common.exceptions import VerificationError
+from ..utilities.rounding import (
     thousand_separator, decimal_separator, add_separators)
 
 
