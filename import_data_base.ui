@@ -29,10 +29,10 @@
   <widget class="QLineEdit" name="file_path_lineedit">
    <property name="geometry">
     <rect>
-     <x>160</x>
+     <x>361</x>
      <y>50</y>
-     <width>221</width>
-     <height>27</height>
+     <width>16</width>
+     <height>16</height>
     </rect>
    </property>
   </widget>
