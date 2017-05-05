@@ -18,7 +18,7 @@ __copyright__ = ('Copyright 2015, Australia Indonesia Facility for '
 from text import Text
 # TODO: I don't really like importing this here as it breaks the modularity of
 # TODO: messaging. TS
-from inasafe.utilities.resources import (
+from ...utilities.resources import (
     resources_path,
     resource_url)
 
