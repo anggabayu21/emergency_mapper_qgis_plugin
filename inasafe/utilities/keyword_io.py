@@ -14,7 +14,7 @@ from PyQt4.QtCore import QUrl, QDateTime
 from qgis.core import QgsMapLayer
 
 from ..definitions.utilities import definition
-from inasafe import messaging as m
+from ...inasafe import messaging as m
 from ..common.exceptions import (
     HashNotFoundError,
     KeywordNotFoundError,
