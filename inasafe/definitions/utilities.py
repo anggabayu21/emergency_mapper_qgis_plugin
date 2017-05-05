@@ -3,7 +3,7 @@
 
 from copy import deepcopy
 
-from inasafe import definitions
+from ...inasafe import definitions
 from ..definitions import fields
 from ..definitions import (
     layer_purposes,
