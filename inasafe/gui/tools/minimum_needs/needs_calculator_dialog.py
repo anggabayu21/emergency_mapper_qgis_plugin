@@ -22,22 +22,22 @@ from qgis.gui import QgsMapLayerProxyModel, QgsFieldProxyModel
 from PyQt4 import QtGui
 from PyQt4.QtCore import pyqtSignature, pyqtSlot, QSettings
 
-from inasafe.common.utilities import temp_dir
-from inasafe.common.version import get_version
-from inasafe.datastore.folder import Folder
-from inasafe.definitions.fields import displaced_field, aggregation_name_field
-from inasafe.definitions.layer_purposes import layer_purpose_aggregation
-from inasafe.definitions.post_processors import minimum_needs_post_processors
-from inasafe.gis.vector.prepare_vector_layer import (
+from ....common.utilities import temp_dir
+from ....common.version import get_version
+from ....datastore.folder import Folder
+from ....definitions.fields import displaced_field, aggregation_name_field
+from ....definitions.layer_purposes import layer_purpose_aggregation
+from ....definitions.post_processors import minimum_needs_post_processors
+from ....gis.vector.prepare_vector_layer import (
     rename_remove_inasafe_fields)
-from inasafe.gis.vector.tools import (
+from ....gis.vector.tools import (
     create_memory_layer, copy_layer)
-from inasafe.gui.tools.help.needs_calculator_help import needs_calculator_help
-from inasafe.impact_function.postprocessors import run_single_post_processor
-from inasafe.messaging import styles
-from inasafe.utilities.qgis_utilities import display_critical_message_box
-from inasafe.utilities.resources import html_footer, html_header, get_ui_class
-from inasafe.utilities.utilities import humanise_exception
+from ....gui.tools.help.needs_calculator_help import needs_calculator_help
+from ....impact_function.postprocessors import run_single_post_processor
+from ....messaging import styles
+from ....utilities.qgis_utilities import display_critical_message_box
+from ....utilities.resources import html_footer, html_header, get_ui_class
+from ....utilities.utilities import humanise_exception
 
 INFO_STYLE = styles.BLUE_LEVEL_4_STYLE
 LOGGER = logging.getLogger('SaVap')

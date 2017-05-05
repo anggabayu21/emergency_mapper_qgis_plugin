@@ -13,10 +13,10 @@ from shutil import copy, rmtree
 from PyQt4.QtCore import QSettings
 from qgis.core import QgsApplication
 
-from inasafe.common.parameters.resource_parameter import ResourceParameter
-from inasafe.common.minimum_needs import MinimumNeeds
-from inasafe.utilities.i18n import tr
-from inasafe.utilities.resources import resources_path
+from ....common.parameters.resource_parameter import ResourceParameter
+from ....common.minimum_needs import MinimumNeeds
+from ....utilities.i18n import tr
+from ....utilities.resources import resources_path
 from inasafe_extras.parameters.text_parameter import TextParameter
 
 

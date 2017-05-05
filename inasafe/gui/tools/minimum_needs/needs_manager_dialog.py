@@ -34,12 +34,12 @@ from PyQt4.QtGui import (
 # pylint: disable=unused-import
 from qgis.core import QGis  # force sip2 api
 
-from inasafe.common.parameters.resource_parameter import ResourceParameter
-from inasafe.gui.tools.help.needs_manager_help import needs_manager_helps
-from inasafe.gui.tools.minimum_needs.needs_profile import NeedsProfile
-from inasafe.messaging import styles
-from inasafe.utilities.i18n import tr
-from inasafe.utilities.resources import (
+from ....common.parameters.resource_parameter import ResourceParameter
+from ....gui.tools.help.needs_manager_help import needs_manager_helps
+from ....gui.tools.minimum_needs.needs_profile import NeedsProfile
+from ....messaging import styles
+from ....utilities.i18n import tr
+from ....utilities.resources import (
     resources_path, get_ui_class, html_footer, html_header)
 from inasafe_extras.parameters.float_parameter import FloatParameter
 from inasafe_extras.parameters.parameter_exceptions import (
