@@ -18,16 +18,16 @@ import urllib2
 import uuid
 import warnings
 
-import raven
-from raven.conf import defaults
-from raven.utils import json, varmap, get_versions, get_auth_header
+import inasafe_extras.raven
+from inasafe_extras.raven.conf import defaults
+from inasafe_extras.raven.utils import json, varmap, get_versions, get_auth_header
 
-from raven.utils.encoding import shorten, to_string
-from raven.utils.serializer import transform
-from raven.utils.stacks import get_stack_info, iter_stack_frames, \
+from inasafe_extras.raven.utils.encoding import shorten, to_string
+from inasafe_extras.raven.utils.serializer import transform
+from inasafe_extras.raven.utils.stacks import get_stack_info, iter_stack_frames, \
   get_culprit
-from raven.utils.urlparse import urlparse
-from raven.transport.registry import TransportRegistry, default_transports
+from inasafe_extras.raven.utils.urlparse import urlparse
+from inasafe_extras.raven.transport.registry import TransportRegistry, default_transports
 
 __all__ = ('Client',)
 

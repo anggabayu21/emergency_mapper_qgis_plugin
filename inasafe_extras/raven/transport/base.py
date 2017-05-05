@@ -31,8 +31,8 @@ try:
 except:
     has_tornado = False
 
-from raven.conf import defaults
-from raven.transport.exceptions import InvalidScheme
+from inasafe_extras.raven.conf import defaults
+from inasafe_extras.raven.transport.exceptions import InvalidScheme
 
 
 class Transport(object):

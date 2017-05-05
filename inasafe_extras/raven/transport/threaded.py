@@ -12,7 +12,7 @@ import threading
 import os
 from Queue import Queue
 
-from raven.transport.base import HTTPTransport
+from inasafe_extras.raven.transport.base import HTTPTransport
 
 DEFAULT_TIMEOUT = 10
 

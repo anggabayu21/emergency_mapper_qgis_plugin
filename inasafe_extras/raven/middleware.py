@@ -7,7 +7,7 @@ raven.middleware
 """
 
 import sys
-from raven.utils.wsgi import get_current_url, get_headers, \
+from inasafe_extras.raven.utils.wsgi import get_current_url, get_headers, \
   get_environ
 
 
@@ -16,7 +16,7 @@ class Sentry(object):
     A WSGI middleware which will attempt to capture any
     uncaught exceptions and send them to Sentry.
 
-    >>> from raven.base import Client
+    >>> from inasafe_extras.raven.base import Client
     >>> application = Sentry(application, Client())
     """
     def __init__(self, application, client):

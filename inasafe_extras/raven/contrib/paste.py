@@ -1,5 +1,5 @@
-from raven.middleware import Sentry
-from raven.base import Client
+from inasafe_extras.raven.middleware import Sentry
+from inasafe_extras.raven.base import Client
 
 
 def sentry_filter_factory(app, global_conf, **kwargs):

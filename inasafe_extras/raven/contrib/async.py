@@ -8,8 +8,8 @@ raven.contrib.async
 
 import warnings
 
-from raven.base import Client
-from raven.transport.threaded import AsyncWorker
+from inasafe_extras.raven.base import Client
+from inasafe_extras.raven.transport.threaded import AsyncWorker
 
 
 class AsyncClient(Client):

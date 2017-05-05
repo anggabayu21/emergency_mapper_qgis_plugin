@@ -8,8 +8,8 @@ raven.contrib.zerorpc
 
 import inspect
 
-from raven.base import Client
-from raven.utils.stacks import iter_traceback_frames
+from inasafe_extras.raven.base import Client
+from inasafe_extras.raven.utils.stacks import iter_traceback_frames
 
 
 class SentryMiddleware(object):

@@ -23,9 +23,11 @@
 import sys
 import os
 sys.path.append(os.path.dirname(__file__))
+#sys.path.append('/usr/share/qgis/python/plugins')
 
-import processing
-#from processing.core.Processing import Processing
+#import inasafe_extras.processing
+from inasafe_extras.processing.algs.qgis import Intersection,PointsInPolygon,ZonalStatistics
+from inasafe_extras.processing.core.SilentProgress import SilentProgress
 
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QObject, SIGNAL, SLOT, QT_VERSION, QFileInfo, QVariant, pyqtSignal
 from PyQt4.QtGui import QAction, QIcon, QTableWidgetItem,QMessageBox,QHeaderView,QFont,QWidget,QTextCursor
@@ -2335,12 +2337,20 @@ class SaVap:
             #alg_processing = Processing.getAlgorithm("qgis:intersection")
             #alg_processing_len = len(alg_processing.parameters)
             print qgis_version()
+            alg = Intersection.Intersection()
+            alg.setParameterValue('INPUT', points)
+            alg.setParameterValue('INPUT2', poly)
+            alg.setParameterValue('IGNORE_NULL', True)
+            alg.setOutputValue('OUTPUT', path_layer)
             
+            progress = SilentProgress()
+            alg.processAlgorithm(progress)
+            """
             if qgis_version() >= 21800:
                 processing.runalg("qgis:intersection",points,poly,True,path_layer)
             else:
                 processing.runalg("qgis:intersection",points,poly,path_layer)
-
+            """
             layer = self.iface.addVectorLayer(path_layer+'.shp', 'Affected Building', "ogr")
             
             try:
@@ -2381,7 +2391,15 @@ class SaVap:
                 os.remove(path_layer+'.qpj')
                 os.remove(path_layer+'.shx')
 
-            processing.runalg("qgis:countpointsinpolygon",poly,points,'NUMPOINTS',path_layer)
+            alg = PointsInPolygon.PointsInPolygon()
+            alg.setParameterValue('POLYGONS', poly)
+            alg.setParameterValue('POINTS', points)
+            alg.setParameterValue('FIELD', 'NUMPOINTS')
+            alg.setOutputValue('OUTPUT', path_layer)
+            progress = SilentProgress()
+            alg.processAlgorithm(progress)
+
+            #processing.runalg("qgis:countpointsinpolygon",poly,points,'NUMPOINTS',path_layer)
             layer = QgsVectorLayer(path_layer+'.shp', 'Affected Building (grad)', 'ogr')
 
             targetField = 'NUMPOINTS'
@@ -2407,7 +2425,16 @@ class SaVap:
                 os.remove(path_layer+'.qpj')
                 os.remove(path_layer+'.shx')
 
-            processing.runalg("qgis:zonalstatistics",raster,1,poly,'_',False,path_layer)
+            alg = ZonalStatistics.ZonalStatistics()
+            alg.setParameterValue('INPUT_RASTER', raster)
+            alg.setParameterValue('RASTER_BAND', 1)
+            alg.setParameterValue('INPUT_VECTOR', poly)
+            alg.setParameterValue('COLUMN_PREFIX', '_')
+            alg.setParameterValue('GLOBAL_EXTENT', False)
+            alg.setOutputValue('OUTPUT_LAYER', path_layer)
+            progress = SilentProgress()
+            alg.processAlgorithm(progress)
+            #processing.runalg("qgis:zonalstatistics",raster,1,poly,'_',False,path_layer)
             layer = QgsVectorLayer(path_layer+'.shp', 'Affected Population', 'ogr')
 
             targetField = '_count'

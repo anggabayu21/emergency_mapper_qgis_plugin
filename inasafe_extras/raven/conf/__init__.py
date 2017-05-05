@@ -7,7 +7,7 @@ raven.conf
 """
 
 import logging
-from raven.utils.urlparse import urlparse
+from inasafe_extras.raven.utils.urlparse import urlparse
 
 
 __all__ = ('load', 'setup_logging')
@@ -33,7 +33,7 @@ def load(dsn, scope=None, transport_registry=None):
     """
 
     if not transport_registry:
-        from raven.transport import TransportRegistry, default_transports
+        from inasafe_extras.raven.transport import TransportRegistry, default_transports
         transport_registry = TransportRegistry(default_transports)
 
     url = urlparse(dsn)
@@ -60,13 +60,13 @@ def setup_logging(handler, exclude=['raven',
 
     For a typical Python install:
 
-    >>> from raven.handlers.logging import SentryHandler
+    >>> from inasafe_extras.raven.handlers.logging import SentryHandler
     >>> client = Sentry(...)
     >>> setup_logging(SentryHandler(client))
 
     Within Django:
 
-    >>> from raven.contrib.django.handlers import SentryHandler
+    >>> from inasafe_extras.raven.contrib.django.handlers import SentryHandler
     >>> setup_logging(SentryHandler())
 
     Returns a boolean based on if logging was configured or not.

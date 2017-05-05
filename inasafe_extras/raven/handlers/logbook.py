@@ -12,8 +12,8 @@ import logbook
 import sys
 import traceback
 
-from raven.base import Client
-from raven.utils.encoding import to_string
+from inasafe_extras.raven.base import Client
+from inasafe_extras.raven.utils.encoding import to_string
 
 
 class SentryHandler(logbook.Handler):

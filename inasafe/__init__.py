@@ -22,9 +22,9 @@ __copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
 # Please import module in safe from the safe root, e.g:
 # from inasafe.x.y import z
 # noinspection PyUnresolvedReferences
-import qgis  # pylint: disable=unused-import
-import logging
+#import qgis  # pylint: disable=unused-import
+#import logging
 
-from inasafe.common.custom_logging import setup_logger
+#from inasafe.common.custom_logging import setup_logger
 
-setup_logger('SaVap')
+#setup_logger('SaVap')

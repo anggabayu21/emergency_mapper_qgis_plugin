@@ -1,8 +1,8 @@
-from raven.transport.base import HTTPTransport, GeventedHTTPTransport, TwistedHTTPTransport, \
+from inasafe_extras.raven.transport.base import HTTPTransport, GeventedHTTPTransport, TwistedHTTPTransport, \
   TornadoHTTPTransport, UDPTransport
-from raven.transport.exceptions import DuplicateScheme
-from raven.transport.threaded import ThreadedHTTPTransport
-from raven.utils import urlparse
+from inasafe_extras.raven.transport.exceptions import DuplicateScheme
+from inasafe_extras.raven.transport.threaded import ThreadedHTTPTransport
+from inasafe_extras.raven.utils import urlparse
 
 
 class TransportRegistry(object):

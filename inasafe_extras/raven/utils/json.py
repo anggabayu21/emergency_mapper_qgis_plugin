@@ -7,11 +7,11 @@ raven.utils.json
 """
 
 import datetime
-import simplejson
+import inasafe_extras.simplejson
 import uuid
 
 
-class BetterJSONEncoder(simplejson.JSONEncoder):
+class BetterJSONEncoder(inasafe_extras.simplejson.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, uuid.UUID):
             return obj.hex

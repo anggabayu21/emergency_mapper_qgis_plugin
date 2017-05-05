@@ -10,7 +10,7 @@ import inspect
 import re
 import sys
 
-from raven.utils.serializer import transform
+from inasafe_extras.raven.utils.serializer import transform
 
 _coding_re = re.compile(r'coding[:=]\s*([-\w.]+)')
 

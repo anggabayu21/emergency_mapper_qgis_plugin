@@ -8,7 +8,7 @@ raven.core.processors
 
 import re
 
-from raven.utils import varmap
+from inasafe_extras.raven.utils import varmap
 
 
 class Processor(object):

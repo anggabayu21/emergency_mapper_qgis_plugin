@@ -6,5 +6,5 @@ raven.utils.serializer
 :license: BSD, see LICENSE for more details.
 """
 
-from raven.utils.serializer.base import *
-from raven.utils.serializer.manager import *
+from inasafe_extras.raven.utils.serializer.base import *
+from inasafe_extras.raven.utils.serializer.manager import *

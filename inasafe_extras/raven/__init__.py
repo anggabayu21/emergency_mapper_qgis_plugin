@@ -14,5 +14,5 @@ try:
 except Exception, e:
     VERSION = 'unknown'
 
-from raven.base import *
-from raven.conf import *
+from inasafe_extras.raven.base import *
+from inasafe_extras.raven.conf import *

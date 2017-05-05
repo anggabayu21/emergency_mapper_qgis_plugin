@@ -9,9 +9,9 @@ raven.events
 import logging
 import sys
 
-from raven.utils import varmap
-from raven.utils.encoding import shorten, to_unicode
-from raven.utils.stacks import get_stack_info, iter_traceback_frames, \
+from inasafe_extras.raven.utils import varmap
+from inasafe_extras.raven.utils.encoding import shorten, to_unicode
+from inasafe_extras.raven.utils.stacks import get_stack_info, iter_traceback_frames, \
                                get_culprit
 
 __all__ = ('BaseEvent', 'Exception', 'Message', 'Query')

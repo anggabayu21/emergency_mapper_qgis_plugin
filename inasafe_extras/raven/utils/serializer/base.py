@@ -6,8 +6,8 @@ raven.utils.serializer.base
 :license: BSD, see LICENSE for more details.
 """
 
-from raven.utils.encoding import to_string, to_unicode
-from raven.utils.serializer.manager import register
+from inasafe_extras.raven.utils.encoding import to_string, to_unicode
+from inasafe_extras.raven.utils.serializer.manager import register
 from types import ClassType, TypeType
 from uuid import UUID
 
