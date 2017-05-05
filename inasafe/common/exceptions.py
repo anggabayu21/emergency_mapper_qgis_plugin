@@ -14,7 +14,7 @@ Contact : ole.moller.nielsen@gmail.com
 
 """
 
-from inasafe.utilities import unicode_ 
+from ..utilities import unicode_ 
 #import get_unicode, get_string
 from inasafe.messaging.item.message_element import MessageElement
 
