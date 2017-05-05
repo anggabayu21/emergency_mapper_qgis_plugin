@@ -18,18 +18,18 @@ __copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
 import unittest
 import os
 
-from inasafe.utilities.styling import (
+from ..utilities.styling import (
     set_vector_graduated_style,
     setRasterStyle,
     add_extrema_to_style,
     mmi_colour)
-from inasafe.test.utilities import (
+from ..test.utilities import (
     standard_data_path,
     load_test_vector_layer,
     load_layer,
     get_qgis_app,
     clone_shp_layer)
-from inasafe.common.exceptions import StyleError
+from ..common.exceptions import StyleError
 
 QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
 

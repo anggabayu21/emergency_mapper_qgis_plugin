@@ -29,10 +29,10 @@ import os
 from PyQt4.QtCore import QObject, pyqtSignal, QVariant, QByteArray, QUrl
 from PyQt4.QtNetwork import QNetworkReply
 
-from inasafe.utilities.osm_downloader import fetch_zip, extract_zip
-from inasafe.test.utilities import standard_data_path, get_qgis_app
-from inasafe.common.version import get_version
-from inasafe.utilities.gis import qgis_version
+from ..utilities.osm_downloader import fetch_zip, extract_zip
+from ..test.utilities import standard_data_path, get_qgis_app
+from ..common.version import get_version
+from ..utilities.gis import qgis_version
 
 QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
 LOGGER = logging.getLogger('SaVap')

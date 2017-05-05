@@ -38,8 +38,8 @@ from qgis.core import (
     QgsSingleBandPseudoColorRenderer)
 from PyQt4 import QtGui
 
-from inasafe.common.exceptions import StyleError
-from inasafe.definitions.hazard_classifications import earthquake_mmi_scale
+from ..common.exceptions import StyleError
+from ..definitions.hazard_classifications import earthquake_mmi_scale
 
 
 LOGGER = logging.getLogger('SaVap')

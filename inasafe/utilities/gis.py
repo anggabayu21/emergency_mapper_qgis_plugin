@@ -17,7 +17,7 @@ from qgis.core import (
     QgsPoint,
     QgsVectorLayer,
     QgsRasterLayer)
-from inasafe.utilities.utilities import LOGGER
+from ..utilities.utilities import LOGGER
 
 
 def extent_string_to_array(extent_text):

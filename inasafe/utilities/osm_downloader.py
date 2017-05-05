@@ -10,11 +10,11 @@ from PyQt4.QtNetwork import QNetworkReply
 from PyQt4.QtGui import QDialog
 from PyQt4.QtCore import QSettings
 
-from inasafe.utilities.i18n import tr, locale
-from inasafe.utilities.gis import qgis_version
-from inasafe.utilities.file_downloader import FileDownloader
-from inasafe.common.exceptions import DownloadError, CanceledImportDialogError
-from inasafe.common.version import get_version, release_status
+from ..utilities.i18n import tr, locale
+from ..utilities.gis import qgis_version
+from ..utilities.file_downloader import FileDownloader
+from ..common.exceptions import DownloadError, CanceledImportDialogError
+from ..common.version import get_version, release_status
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"

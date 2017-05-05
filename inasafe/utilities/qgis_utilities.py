@@ -14,7 +14,7 @@ from qgis.core import QGis, QgsProject, QgsMapLayerRegistry, QgsLayerTreeLayer
 from qgis.utils import iface
 from PyQt4.QtGui import QMessageBox, QPushButton
 
-from inasafe.utilities.i18n import tr
+from ..utilities.i18n import tr
 
 
 def add_above_layer(new_layer, *existing_layers):

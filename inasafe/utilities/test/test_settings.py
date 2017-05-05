@@ -2,12 +2,12 @@
 """Test for Settings Utilities."""
 
 import unittest
-from inasafe.test.utilities import get_qgis_app
+from ..test.utilities import get_qgis_app
 QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
 from PyQt4.QtCore import QSettings
-from inasafe.definitions.constants import zero_default_value, RECENT
-from inasafe.definitions.default_settings import inasafe_default_settings
-from inasafe.utilities.settings import (
+from ..definitions.constants import zero_default_value, RECENT
+from ..definitions.default_settings import inasafe_default_settings
+from ..utilities.settings import (
     setting,
     set_setting,
     set_inasafe_default_value_qsetting,

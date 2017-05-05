@@ -3,7 +3,7 @@
 import unittest
 import json
 
-from inasafe.utilities.pivot_table import FlatTable, PivotTable
+from ..utilities.pivot_table import FlatTable, PivotTable
 
 
 class PivotTableTest(unittest.TestCase):

@@ -24,9 +24,9 @@ import tempfile
 # noinspection PyUnresolvedReferences
 import qgis  # pylint: disable=unused-import
 
-from inasafe.utilities.file_downloader import FileDownloader
-from inasafe.common.exceptions import DownloadError
-from inasafe.test.utilities import assert_hash_for_file, get_qgis_app
+from ..utilities.file_downloader import FileDownloader
+from ..common.exceptions import DownloadError
+from ..test.utilities import assert_hash_for_file, get_qgis_app
 
 QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
 

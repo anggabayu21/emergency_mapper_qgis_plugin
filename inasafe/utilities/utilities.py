@@ -13,19 +13,19 @@ import webbrowser
 
 from PyQt4.QtCore import QPyNullVariant
 
-from inasafe.common.exceptions import NoKeywordsFoundError, MetadataReadError
-from inasafe.definitions.versions import (
+from ..common.exceptions import NoKeywordsFoundError, MetadataReadError
+from ..definitions.versions import (
     inasafe_keyword_version,
     keyword_version_compatibilities)
-from inasafe.definitions.messages import disclaimer
-from inasafe import messaging as m
-from inasafe.common.utilities import unique_filename
-from inasafe.common.version import get_version
-from inasafe.messaging import styles, Message
-from inasafe.messaging.error_message import ErrorMessage
-from inasafe.utilities.i18n import tr
-from inasafe.utilities.unicode import get_unicode
-from inasafe.utilities.keyword_io import KeywordIO
+from ..definitions.messages import disclaimer
+from ...inasafe import messaging as m
+from ..common.utilities import unique_filename
+from ..common.version import get_version
+from ..messaging import styles, Message
+from ..messaging.error_message import ErrorMessage
+from ..utilities.i18n import tr
+from ..utilities.unicode import get_unicode
+from ..utilities.keyword_io import KeywordIO
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"

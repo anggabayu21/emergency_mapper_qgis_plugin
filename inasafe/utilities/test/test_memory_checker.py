@@ -4,7 +4,7 @@
 import os
 import unittest
 
-from inasafe.utilities.memory_checker import check_memory_usage
+from ..utilities.memory_checker import check_memory_usage
 
 
 class TestMemoryChecker(unittest.TestCase):

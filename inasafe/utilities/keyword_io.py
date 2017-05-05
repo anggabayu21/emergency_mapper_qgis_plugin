@@ -13,9 +13,9 @@ from PyQt4.QtCore import QUrl, QDateTime
 
 from qgis.core import QgsMapLayer
 
-from inasafe.definitions.utilities import definition
+from ..definitions.utilities import definition
 from inasafe import messaging as m
-from inasafe.common.exceptions import (
+from ..common.exceptions import (
     HashNotFoundError,
     KeywordNotFoundError,
     KeywordDbError,
@@ -23,14 +23,14 @@ from inasafe.common.exceptions import (
     NoKeywordsFoundError,
     MetadataReadError
 )
-from inasafe.common.utilities import verify
-from inasafe.messaging import styles
-from inasafe.utilities.i18n import tr
-from inasafe.utilities.metadata import (
+from ..common.utilities import verify
+from ..messaging import styles
+from ..utilities.i18n import tr
+from ..utilities.metadata import (
     write_iso19115_metadata,
     read_iso19115_metadata,
 )
-from inasafe.utilities.unicode import get_string
+from ..utilities.unicode import get_string
 
 __author__ = 'tim@kartoza.com'
 __revision__ = '4c85bcb847131a3d634744b9ea01083b158493bf'

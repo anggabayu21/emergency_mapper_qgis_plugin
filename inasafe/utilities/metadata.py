@@ -7,19 +7,19 @@ from datetime import datetime, date
 
 from PyQt4.QtCore import QUrl, QDate, QDateTime, Qt
 
-from inasafe.common.exceptions import (
+from ..common.exceptions import (
     MetadataReadError,
     KeywordNotFoundError,
     NoKeywordsFoundError)
-from inasafe.definitions.layer_purposes import (
+from ..definitions.layer_purposes import (
     layer_purpose_hazard,
     layer_purpose_exposure,
     layer_purpose_aggregation,
     layer_purpose_exposure_summary
 )
-from inasafe.definitions.layer_modes import layer_mode_continuous
-from inasafe.definitions.versions import inasafe_keyword_version
-from inasafe.metadata import (
+from ..definitions.layer_modes import layer_mode_continuous
+from ..definitions.versions import inasafe_keyword_version
+from ..metadata import (
     ExposureLayerMetadata,
     HazardLayerMetadata,
     AggregationLayerMetadata,

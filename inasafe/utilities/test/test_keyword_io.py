@@ -4,17 +4,17 @@ import unittest
 
 from qgis.core import QgsDataSourceURI, QgsVectorLayer
 
-from inasafe.definitions.versions import inasafe_keyword_version
-from inasafe.common.exceptions import NoKeywordsFoundError
-from inasafe.common.utilities import unique_filename
-from inasafe.test.utilities import (
+from ..definitions.versions import inasafe_keyword_version
+from ..common.exceptions import NoKeywordsFoundError
+from ..common.utilities import unique_filename
+from ..test.utilities import (
     load_layer,
     get_qgis_app,
     standard_data_path,
     clone_raster_layer)
-from inasafe.utilities.keyword_io import KeywordIO
-from inasafe.utilities.metadata import read_iso19115_metadata
-from inasafe.utilities.unicode import get_unicode
+from ..utilities.keyword_io import KeywordIO
+from ..utilities.metadata import read_iso19115_metadata
+from ..utilities.unicode import get_unicode
 
 QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
 

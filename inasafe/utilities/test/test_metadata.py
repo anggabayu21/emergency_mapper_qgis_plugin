@@ -6,9 +6,9 @@ from datetime import datetime
 from qgis.utils import iface  # pylint: disable=W0621
 from PyQt4.QtCore import QUrl
 
-from inasafe.definitions.versions import inasafe_keyword_version
-from inasafe.test.utilities import standard_data_path, clone_shp_layer
-from inasafe.utilities.metadata import (
+from ..definitions.versions import inasafe_keyword_version
+from ..test.utilities import standard_data_path, clone_shp_layer
+from ..utilities.metadata import (
     write_iso19115_metadata,
     read_iso19115_metadata,
     active_classification,

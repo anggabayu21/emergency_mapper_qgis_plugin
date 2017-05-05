@@ -4,8 +4,8 @@
 
 from math import ceil
 
-from inasafe.definitions.units import unit_mapping
-from inasafe.utilities.i18n import locale
+from ..definitions.units import unit_mapping
+from ..utilities.i18n import locale
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"

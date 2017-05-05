@@ -27,8 +27,8 @@ from PyQt4.QtCore import QCoreApplication, QFile, QUrl, QByteArray
 # noinspection PyPackageRequirements
 from PyQt4.QtNetwork import QNetworkRequest, QNetworkReply
 
-from inasafe.common.utilities import humanize_file_size
-from inasafe.utilities.i18n import tr
+from ..common.utilities import humanize_file_size
+from ..utilities.i18n import tr
 
 LOGGER = logging.getLogger('SaVap')
 

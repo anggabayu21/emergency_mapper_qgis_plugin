@@ -11,7 +11,7 @@ from qgis.gui import QgsRubberBand  # pylint: disable=no-name-in-module
 # noinspection PyPackageRequirements
 from PyQt4.QtCore import QSettings, Qt
 
-from inasafe.definitions.styles import (
+from ..definitions.styles import (
     user_analysis_color,
     next_analysis_color,
     last_analysis_color,
@@ -19,7 +19,7 @@ from inasafe.definitions.styles import (
     next_analysis_width,
     last_analysis_width
 )
-from inasafe.utilities.settings import set_setting
+from ..utilities.settings import set_setting
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"

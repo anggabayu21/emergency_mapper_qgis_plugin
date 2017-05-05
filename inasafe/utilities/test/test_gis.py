@@ -8,12 +8,12 @@ import unittest
 import qgis  # pylint: disable=unused-import
 from qgis.core import QgsRectangle
 
-from inasafe.utilities.gis import (
+from ..utilities.gis import (
     is_polygon_layer,
     is_raster_y_inverted,
     wkt_to_rectangle,
     validate_geo_array)
-from inasafe.test.utilities import (
+from ..test.utilities import (
     clone_raster_layer,
     load_test_vector_layer,
     load_test_raster_layer,

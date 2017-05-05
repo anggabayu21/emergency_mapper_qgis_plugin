@@ -24,10 +24,10 @@ import logging
 import qgis  # pylint: disable=unused-import
 from PyQt4.QtCore import QCoreApplication
 
-from inasafe.common.utilities import get_free_memory
+from ..common.utilities import get_free_memory
 from inasafe import messaging as m
-from inasafe.messaging import styles
-from inasafe.common.signals import send_dynamic_message, send_static_message
+from ..messaging import styles
+from ..common.signals import send_dynamic_message, send_static_message
 from inasafe_extras.pydispatch import dispatcher
 
 PROGRESS_UPDATE_STYLE = styles.PROGRESS_UPDATE_STYLE

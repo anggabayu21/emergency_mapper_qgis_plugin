@@ -6,20 +6,20 @@ import os
 import codecs
 from unittest import expectedFailure
 
-from inasafe.test.utilities import (
+from ..test.utilities import (
     standard_data_path,
     get_qgis_app,
 )
 
 QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
 
-from inasafe.utilities.utilities import (
+from ..utilities.utilities import (
     humanise_seconds,
     impact_attribution,
     replace_accentuated_characters,
     is_keyword_version_supported
 )
-from inasafe.utilities.gis import qgis_version
+from ..utilities.gis import qgis_version
 
 
 class UtilitiesTest(unittest.TestCase):

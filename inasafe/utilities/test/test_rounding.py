@@ -4,16 +4,16 @@ import logging
 import random
 import unittest
 
-from inasafe.definitions.units import (
+from ..definitions.units import (
     unit_millimetres, unit_metres, unit_kilometres, unit_knots)
-from inasafe.utilities.rounding import (
+from ..utilities.rounding import (
     population_rounding_full,
     population_rounding,
     add_separators,
     convert_unit,
     fatalities_range,
 )
-from inasafe.utilities.i18n import locale
+from ..utilities.i18n import locale
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"

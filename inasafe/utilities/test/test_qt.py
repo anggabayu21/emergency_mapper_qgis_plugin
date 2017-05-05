@@ -2,7 +2,7 @@
 """Tests for Qt specific utiltities."""
 
 import unittest
-from inasafe.utilities.qt import qt_at_least
+from ..utilities.qt import qt_at_least
 
 
 class TestQt(unittest.TestCase):
