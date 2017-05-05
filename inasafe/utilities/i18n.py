@@ -7,7 +7,7 @@ import qgis  # pylint: disable=unused-import
 from PyQt4.QtCore import QCoreApplication, QSettings, QLocale
 import logging
 
-from inasafe.utilities.unicode import get_unicode
+from ..utilities.unicode import get_unicode
 
 __copyright__ = "Copyright 2016, The InaSAFE Project"
 __license__ = "GPL version 3"
