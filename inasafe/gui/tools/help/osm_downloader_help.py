@@ -1,9 +1,9 @@
 # coding=utf-8
 """Help text for OSM Downloader."""
 
-from inasafe.utilities.i18n import tr
-from inasafe import messaging as m
-from inasafe.messaging import styles
+from ....utilities.i18n import tr
+from .....inasafe import messaging as m
+from ....messaging import styles
 
 #SUBSECTION_STYLE = styles.SUBSECTION_LEVEL_3_STYLE
 SUBSECTION_STYLE = {
