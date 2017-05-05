@@ -14,7 +14,7 @@ Contact : ole.moller.nielsen@gmail.com
 
 """
 
-from inasafe.utilities import unicode 
+from inasafe.utilities import unicode_ 
 #import get_unicode, get_string
 from inasafe.messaging.item.message_element import MessageElement
 
@@ -39,16 +39,16 @@ class InaSAFEError(RuntimeError):
         :type message: str, unicode, MessageElement
         """""
         if isinstance(message, unicode):
-            super(InaSAFEError, self).__init__(unicode.get_string(message))
+            super(InaSAFEError, self).__init__(unicode_.get_string(message))
             self.message = message
 
         elif isinstance(message, str):
             super(InaSAFEError, self).__init__(message)
-            self.message = unicode.get_unicode(message)
+            self.message = unicode_.get_unicode(message)
 
         elif isinstance(message, MessageElement):
             super(InaSAFEError, self).__init__(message.to_text())
-            self.message = unicode.get_unicode(message.to_text())
+            self.message = unicode_.get_unicode(message.to_text())
 
         elif message is None:
             pass
