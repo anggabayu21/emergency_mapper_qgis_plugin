@@ -455,6 +455,8 @@ class SaVap:
         self.result_lbl = ""
         self.method_name_global = ""
         self.total_analysis_with_grad = ""
+        self.total_affected_population = ""
+        self.total_affected_building_grad = ""
         self.total_affected_building = ""
         self.total_geobingan_data = {}
         self.init_wizard()
@@ -1745,9 +1747,9 @@ class SaVap:
             if layer.name() == 'Affected Building':
                 self.analysis_content = self.analysis_content + self.total_affected_building + '<br>'
             elif layer.name() == 'Affected Population':
-                self.analysis_content = self.analysis_content + "Total affected population " + self.total_analysis_with_grad + '<br>'
+                self.analysis_content = self.analysis_content + "Total affected population " + self.total_affected_population + '<br>'
             elif layer.name() == 'Affected Building (grad)':
-                self.analysis_content = self.analysis_content + "Total affected building " + self.total_analysis_with_grad + '<br>'
+                self.analysis_content = self.analysis_content + "Total affected building " + self.total_affected_building_grad + '<br>'
 
         if self.analysis_content != '':
             self.result_lbl = "Result"
@@ -2406,6 +2408,7 @@ class SaVap:
             classes = 5
             if layer.isValid():
                 self.applySymbologyEqualTotalValue(layer, classes, targetField)
+                self.total_affected_building_grad = self.total_analysis_with_grad
                 QgsMapLayerRegistry.instance().addMapLayers( [layer] )   
                 QMessageBox.information(None, "Success:", str("Analysis Success, new layer Affected Building (grad) created"))
         except IOError as ex:
@@ -2441,6 +2444,7 @@ class SaVap:
             classes = 5
             if layer.isValid():
                 self.applySymbologyEqualTotalValue(layer, classes, targetField)
+                self.total_affected_population = self.total_analysis_with_grad
                 QgsMapLayerRegistry.instance().addMapLayers( [layer] )   
                 QMessageBox.information(None, "Success:", str("Analysis Success, new layer Affected Population created"))
         except IOError as ex:
