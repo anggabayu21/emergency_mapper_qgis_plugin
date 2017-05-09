@@ -26,7 +26,7 @@ sys.path.append(os.path.dirname(__file__))
 #sys.path.append('/usr/share/qgis/python/plugins')
 
 #import inasafe_extras.processing
-from inasafe_extras.processing.algs.qgis import Intersection,PointsInPolygon,ZonalStatistics
+from inasafe_extras.processing.algs.qgis import Intersection,PointsInPolygon,ZonalStatistics,Clip
 from inasafe_extras.processing.core.SilentProgress import SilentProgress
 
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QObject, SIGNAL, SLOT, QT_VERSION, QFileInfo, QVariant, pyqtSignal
@@ -2002,6 +2002,8 @@ class SaVap:
         self.road_osm_dlg.browse_file_btn.setDisabled(True)
         self.building_osm_dlg.browse_file_btn.setDisabled(True)
 
+        self.vap_layer_name = ""
+
     def filter_data_quickmap(self):
         country_cb = str(self.wizard_quickmap0_dlg.country_comboBox.currentText()).lower()
         disaster_cb = str(self.wizard_quickmap0_dlg.disaster_type_comboBox.currentText()).lower()
@@ -2222,6 +2224,11 @@ class SaVap:
         if len(self.impact_layer_list)>=2:
             self.wizard_impact1_dlg.run_analysis_btn.setDisabled(False)
 
+        if type_data == "VAP":
+            poly=QgsMapLayerRegistry.instance().mapLayersByName(layer_name)[0]
+            clip_layer=QgsMapLayerRegistry.instance().mapLayersByName(self.vap_layer_name)[0]
+            self.clip_poly(poly,clip_layer)
+
 
     def close_wizard_impact0(self):
         self.wizard_impact0_dlg.close() 
@@ -2268,19 +2275,31 @@ class SaVap:
     def load_data_country_adm(self):
         idCountry = self.wizard_impact0_dlg.country_comboBox.currentIndex()
         country = self.country_list[idCountry][1]
+        self.country_detail_adm_dlg.adm1_comboBox.clear()
+        self.country_detail_adm_dlg.adm1_comboBox.setDisabled(True)
+        self.country_detail_adm_dlg.adm1_radio.setDisabled(True)
+        self.country_detail_adm_dlg.adm2_comboBox.clear()
+        self.country_detail_adm_dlg.adm2_comboBox.setDisabled(True)
+        self.country_detail_adm_dlg.adm2_radio.setDisabled(True)
+        self.country_detail_adm_dlg.adm3_comboBox.clear()
+        self.country_detail_adm_dlg.adm3_comboBox.setDisabled(True)
+        self.country_detail_adm_dlg.adm3_radio.setDisabled(True)
         self.country_detail_adm_dlg.download_label.setText('Administrative boundaries for '+country)
         if os.path.exists(resources_path('countries_admin', self.country_list[idCountry][2],self.country_list[idCountry][2]+'_adm0.shp')) == False:
             self.country_detail_adm_dlg.download_button.show()
+
         else:
             self.country_detail_adm_dlg.download_button.hide()
             
             #adm1
             path_file = resources_path('countries_admin',self.country_list[idCountry][2],self.country_list[idCountry][2]+'_adm1.shp')
+            self.country_detail_adm_dlg.adm1_comboBox.setDisabled(False)
+            self.country_detail_adm_dlg.adm1_radio.setDisabled(False)
             layer = QgsVectorLayer(path_file, country, 'ogr')
             list_adm1 = []
             for feature in layer.getFeatures():
                 list_adm1.append( feature['NAME_1'] )
-
+            list_adm1.sort()
             self.country_detail_adm_dlg.adm1_comboBox.clear()
             self.country_detail_adm_dlg.adm1_comboBox.addItems(list_adm1)
 
@@ -2294,6 +2313,7 @@ class SaVap:
                 for feature in layer.getFeatures():
                     list_adm2.append( feature['NAME_2'] )
 
+                list_adm2.sort()
                 self.country_detail_adm_dlg.adm2_comboBox.clear()
                 self.country_detail_adm_dlg.adm2_comboBox.addItems(list_adm2)
             else:
@@ -2309,7 +2329,7 @@ class SaVap:
                 list_adm3 = []
                 for feature in layer.getFeatures():
                     list_adm3.append( feature['NAME_3'] )
-
+                list_adm3.sort()
                 self.country_detail_adm_dlg.adm3_comboBox.clear()
                 self.country_detail_adm_dlg.adm3_comboBox.addItems(list_adm3)
             else:
@@ -2317,6 +2337,7 @@ class SaVap:
                 self.country_detail_adm_dlg.adm3_radio.setDisabled(True)
 
     def country_adm_extend(self, adm_name,layer,field_name):
+        layer_name = layer.name()
         canvas = self.iface.mapCanvas()
         layer.removeSelection()
         expr = QgsExpression("\""+field_name+"\"='"+adm_name+"'")
@@ -2324,7 +2345,8 @@ class SaVap:
         ids = [i.id() for i in it]
         layer.setSelectedFeatures(ids)
         canvas.zoomToSelected(layer)
-        canvas.refresh()            
+        canvas.refresh()     
+        self.vap_layer_name =  layer_name   
 
     def load_country_adm(self):
         idCountry = self.wizard_impact0_dlg.country_comboBox.currentIndex()
@@ -2648,6 +2670,45 @@ class SaVap:
             QMessageBox.information(None, "ERROR:", str("Invalid layers"))
             raise IOError(ex)
 
+    def clip_poly(self,input_poly,clip_layer):
+        try:
+            path_layer = resources_path('webservice', 'memory4')
+            layer_name = input_poly.name()
+            if os.path.exists(resources_path('webservice', 'memory4.shp')):
+                os.remove(path_layer+'.shp')
+                os.remove(path_layer+'.dbf')
+                os.remove(path_layer+'.prj')
+                os.remove(path_layer+'.qpj')
+                os.remove(path_layer+'.shx') 
+
+            new_clip_layer =  QgsVectorLayer('Polygon?crs=epsg:4326', clip_layer.name()+'_' , "memory")
+            pr = new_clip_layer.dataProvider()
+            features = clip_layer.selectedFeatures()
+            for f in features:
+                pr.addFeatures([f])
+            new_clip_layer.updateExtents()
+            QgsMapLayerRegistry.instance().addMapLayers([new_clip_layer])         
+
+            alg = Clip.Clip()
+            alg.setParameterValue('INPUT', input_poly)
+            alg.setParameterValue('OVERLAY', new_clip_layer)
+            alg.setOutputValue('OUTPUT', path_layer)
+            progress = SilentProgress()
+            alg.processAlgorithm(progress) 
+
+            layer = QgsVectorLayer(path_layer+'.shp', layer_name, 'ogr')
+
+            if layer.isValid():
+                QgsMapLayerRegistry.instance().removeMapLayer(input_poly.id())
+                QgsMapLayerRegistry.instance().removeMapLayer(new_clip_layer.id()) 
+                QgsMapLayerRegistry.instance().addMapLayers( [layer] )   
+                canvas = self.iface.mapCanvas()
+                extent = layer.extent()
+                canvas.setExtent(extent)
+                canvas.refresh()
+        except IOError as ex:
+            QMessageBox.information(None, "ERROR:", str("Clip failed"))
+            raise IOError(ex)
          
 
     def getSortedFloatsFromAttributeTable( self, layer, fieldName ):
