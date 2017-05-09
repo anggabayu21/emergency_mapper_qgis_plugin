@@ -9,7 +9,7 @@
 [general]
 name=Emergency Mapper
 qgisMinimumVersion=2.0
-description=This plugin is to create Rapid Map and Impact Map for emergency response. Currently the plugin can utilize Sentinel Asia Value Added Product that comes as GIS Services.
+description=This plugin creates maps for emergency response purposes. It utilizes the value added products prepared from the satellite images acquired immediately after a disaster under the Sentinel Asia initiative.
 version=0.0.1
 author=GIC - AIT
 email=anggabayu@ait.asia

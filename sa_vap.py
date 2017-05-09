@@ -2231,16 +2231,14 @@ class SaVap:
         if len(self.impact_layer_list)>=2:
             self.wizard_impact1_dlg.run_analysis_btn.setDisabled(False)
 
-        if type_data == "VAP" or type_data == "Population" or type_data == "Building":
+        if type_data == "VAP" or type_data == "Building":
             poly=QgsMapLayerRegistry.instance().mapLayersByName(layer_name)[0]
             clip_layer=QgsMapLayerRegistry.instance().mapLayersByName(self.vap_layer_name)[0]
             new_file_name = "memory4"
             if type_data == "VAP":
                 new_file_name = "memory4"
-            elif type_data == "Population":
-                new_file_name = "memory5"
             elif type_data == "Building":
-                new_file_name = "memory6"
+                new_file_name = "memory5"
             self.clip_poly(poly,clip_layer,new_file_name)
 
 
