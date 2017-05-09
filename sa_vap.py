@@ -2234,7 +2234,14 @@ class SaVap:
         if type_data == "VAP" or type_data == "Population" or type_data == "Building":
             poly=QgsMapLayerRegistry.instance().mapLayersByName(layer_name)[0]
             clip_layer=QgsMapLayerRegistry.instance().mapLayersByName(self.vap_layer_name)[0]
-            self.clip_poly(poly,clip_layer)
+            new_file_name = "memory4"
+            if type_data == "VAP":
+                new_file_name = "memory4"
+            elif type_data == "Population":
+                new_file_name = "memory5"
+            elif type_data == "Building":
+                new_file_name = "memory6"
+            self.clip_poly(poly,clip_layer,new_file_name)
 
 
     def close_wizard_impact0(self):
@@ -2677,11 +2684,11 @@ class SaVap:
             QMessageBox.information(None, "ERROR:", str("Invalid layers"))
             raise IOError(ex)
 
-    def clip_poly(self,input_poly,clip_layer):
+    def clip_poly(self,input_poly,clip_layer,new_file_name):
         try:
-            path_layer = resources_path('webservice', 'memory4')
+            path_layer = resources_path('webservice', new_file_name)
             layer_name = input_poly.name()
-            if os.path.exists(resources_path('webservice', 'memory4.shp')):
+            if os.path.exists(resources_path('webservice', new_file_name+'.shp')):
                 os.remove(path_layer+'.shp')
                 os.remove(path_layer+'.dbf')
                 os.remove(path_layer+'.prj')
