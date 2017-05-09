@@ -2231,7 +2231,7 @@ class SaVap:
         if len(self.impact_layer_list)>=2:
             self.wizard_impact1_dlg.run_analysis_btn.setDisabled(False)
 
-        if type_data == "VAP":
+        if type_data == "VAP" or type_data == "Population" or type_data == "Building":
             poly=QgsMapLayerRegistry.instance().mapLayersByName(layer_name)[0]
             clip_layer=QgsMapLayerRegistry.instance().mapLayersByName(self.vap_layer_name)[0]
             self.clip_poly(poly,clip_layer)
@@ -3123,10 +3123,6 @@ class SaVap:
         try:
             extent = viewport_geo_array(self.iface.mapCanvas())
             feature_type = "buildings"
-            if self.wizard1_clicked:
-                feature_type = "building-points"
-                self.check_impact_layer("Building",feature_type)
-
             output_directory = self.building_osm_dlg.output_directory.text()
             output_prefix = ""
             overwrite = True
@@ -3135,7 +3131,7 @@ class SaVap:
 
             self.progress_dialog = QProgressDialog()
             self.progress_dialog.setAutoClose(False)
-            title = self.tr('Road osm download')
+            title = self.tr('Building osm download')
             self.progress_dialog.setWindowTitle(title)
 
             # noinspection PyTypeChecker
@@ -3147,6 +3143,9 @@ class SaVap:
 
             try:
                 self.load_shapefile(feature_type, output_base_file_path)
+
+                if self.wizard1_clicked:
+                    self.check_impact_layer("Building",feature_type)
             except FileMissingError as exception:
                 print exception.message
                 QMessageBox.information(None, "Error:", str("Error download OSM data"))
