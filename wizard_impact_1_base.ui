@@ -362,7 +362,6 @@
   <zorder>label_4</zorder>
   <zorder>label_5</zorder>
   <zorder>label_data_analysis</zorder>
-  <zorder>osm_btn</zorder>
   <zorder>layers_listView</zorder>
   <zorder>label_10</zorder>
   <zorder>back_btn</zorder>
@@ -371,6 +370,7 @@
   <zorder>line_4</zorder>
   <zorder>label_6</zorder>
   <zorder>label_data_analysis_2</zorder>
+  <zorder>osm_btn</zorder>
  </widget>
  <resources/>
  <connections/>
