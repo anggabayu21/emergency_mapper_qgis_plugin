@@ -1989,18 +1989,25 @@ class SaVap:
 
         self.wizard_quickmap0_dlg.disaster_type_comboBox.clear()
         self.wizard_quickmap0_dlg.disaster_type_comboBox.addItems(disaster_list)
+        self.wizard_quickmap0_dlg.disaster_type_comboBox.hide()
 
         self.wizard_impact0_dlg.country_comboBox.clear()
         self.wizard_impact0_dlg.country_comboBox.addItems(country_cb_list)
 
         self.wizard_impact0_dlg.disaster_type_comboBox.clear()
         self.wizard_impact0_dlg.disaster_type_comboBox.addItems(disaster_list)
+        self.wizard_impact0_dlg.disaster_type_comboBox.hide()
 
         self.wizard_impact0_dlg.analysis_comboBox.clear()
         self.wizard_impact0_dlg.analysis_comboBox.addItems(analysis_list)
 
         self.road_osm_dlg.browse_file_btn.setDisabled(True)
         self.building_osm_dlg.browse_file_btn.setDisabled(True)
+
+        self.wizard_impact1_dlg.basemap_btn.hide()
+        self.wizard_impact1_dlg.geobingan_btn.hide()
+        self.wizard_impact1_dlg.local_btn.hide()
+        self.wizard_quickmap1_dlg.vap_btn.hide()
 
         self.vap_layer_name = ""
 
