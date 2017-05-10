@@ -681,9 +681,9 @@ class SaVap:
             QMessageBox.information(None, "Error:", failed_import_file)
     
         self.import_data_dlg.close()  
-        if self.wizard_clicked:
+        if self.check_wizard_quickmap_dialog():
             self.wizard_quickmap_trigger()
-        if self.wizard1_clicked:
+        if self.check_wizard_impact_dialog():
             self.wizard_impact_trigger()    
 
     def close_importdata(self):
@@ -709,9 +709,9 @@ class SaVap:
         else:
             self.import_bm_data_dlg.close()
             self.basemap_dlg.close()  
-            if self.wizard_clicked:
+            if self.check_wizard_quickmap_dialog():
                 self.wizard_quickmap_trigger()
-            if self.wizard1_clicked:
+            if self.check_wizard_impact_dialog():
                 self.wizard_impact_trigger()    
 
     def close_importbmdata(self):
@@ -734,9 +734,9 @@ class SaVap:
         layer = self._olLayerTypeRegistry.getById(layer_id)
         layer.addLayer() 
         self.basemap_dlg.close()  
-        if self.wizard_clicked:
+        if self.check_wizard_quickmap_dialog():
             self.wizard_quickmap_trigger()
-        if self.wizard1_clicked:
+        if self.check_wizard_impact_dialog():
             self.wizard_impact_trigger()    
 
     def run_analysis(self):
@@ -838,11 +838,11 @@ class SaVap:
                 True)
 
     def callbackclose(self): 
-        if self.wizard_clicked:
+        if self.check_wizard_quickmap_dialog():
             self.wizard_quickmap_trigger()
             self.wizard_quickmap1_dlg.close()
             self.wizard_quickmap1_dlg.show()
-        if self.wizard1_clicked:
+        if self.check_wizard_impact_dialog():
             self.wizard_impact_trigger()  
             self.wizard_impact1_dlg.close()  
             self.wizard_impact1_dlg.show()  
@@ -1362,7 +1362,7 @@ class SaVap:
         #custom web service object
         dataset = self.selectdataSets(dataset_name,dataset_serviceType)  
         set_extent = True      
-        if self.wizard1_clicked:
+        if self.check_wizard_impact_dialog():
             set_extent = False
                 
         urlWithParams = dataset.webServiceParams()  
@@ -1432,11 +1432,11 @@ class SaVap:
 
         self.method_name_global = method_name
 
-        if method_name == False and self.wizard_clicked == True:
+        if method_name == False and self.check_wizard_quickmap_dialog() == True:
             self.datasets = self.datasets_temp
             self.fill_table(self.datasets) 
 
-        if method_name == False and self.wizard1_clicked == True:
+        if method_name == False and self.check_wizard_impact_dialog() == True:
             self.datasets = self.datasets_temp
             self.fill_table(self.datasets)        
 
@@ -1469,9 +1469,9 @@ class SaVap:
         self.init_searchBox()
         """close the dialog"""
         self.dlg.close() 
-        if self.wizard_clicked:
+        if self.check_wizard_quickmap_dialog():
             self.wizard_quickmap_trigger('webservice')
-        if self.wizard1_clicked:
+        if self.check_wizard_impact_dialog():
             self.wizard_impact_trigger('webservice')    
 
     #basemap
@@ -1744,9 +1744,9 @@ class SaVap:
                 QMessageBox.information(None, "Success:", str("Create JPG Success, the file can be found in this directory "+full_path))   
 
             self.close_print()
-            if self.wizard_clicked:
+            if self.check_wizard_quickmap_dialog():
                 self.wizard_quickmap_trigger()
-            if self.wizard1_clicked:
+            if self.check_wizard_impact_dialog():
                 self.wizard_impact_trigger() 
 
     def get_total_analysis(self):
@@ -1785,9 +1785,9 @@ class SaVap:
 
     def close_open_data(self):
         self.open_data_dlg.close()
-        if self.wizard_clicked:
+        if self.check_wizard_quickmap_dialog():
             self.wizard_quickmap_trigger() 
-        if self.wizard1_clicked:
+        if self.check_wizard_impact_dialog():
             self.wizard_impact_trigger()     
 
     def run_geobingan(self):
@@ -1806,9 +1806,9 @@ class SaVap:
         self.download_geobingan_data(bbox_str,self.progress_dialog)
         self.convert_json_vectorpoint()
         self.close_geobingan()
-        if self.wizard_clicked:
+        if self.check_wizard_quickmap_dialog():
             self.wizard_quickmap_trigger()
-        if self.wizard1_clicked:
+        if self.check_wizard_impact_dialog():
             self.wizard_impact_trigger()      
 
     def download_geobingan_data(self,bbox_str,progress_dialog):
@@ -1914,8 +1914,6 @@ class SaVap:
             
     #wizard part
     def init_wizard(self):
-        self.wizard_clicked = False
-        self.wizard1_clicked = False
         self.select_exposure_data_dlg = SelectExposureData()
         self.wizard_quickmap0_dlg = WizardQuickmap0()
         self.wizard_quickmap1_dlg = WizardQuickmap1()
@@ -2052,12 +2050,6 @@ class SaVap:
         self.datasets = foundDatasets
         self.fill_table(foundDatasets)          
 
-    def run_wizard(self):
-        """Run method that performs all the real work"""
-        # show the dialog
-        self.wizard_clicked = True
-        self.run_basemap()
-
     def basemap_default(self):
         layers = self.iface.legendInterface().layers()
         osm_layer_available = False
@@ -2117,11 +2109,20 @@ class SaVap:
         canvas.zoomToSelected(layer)
         canvas.refresh()
 
-    def run_wizard_quickmap0(self):
-        if self.wizard_clicked == False:
-            self.wizard_clicked = True
-            self.basemap_default()
+    def check_wizard_quickmap_dialog(self):
+        open_bool = False
+        if self.wizard_quickmap0_dlg.getOpenBool():
+            open_bool = True
+        if self.wizard_quickmap1_dlg.getOpenBool():
+            open_bool = True
+        if self.wizard_quickmap2_dlg.getOpenBool():
+            open_bool = True
+       
+        return open_bool
 
+    def run_wizard_quickmap0(self):
+        if self.check_wizard_quickmap_dialog() == False:
+            self.basemap_default()
             self.wizard_quickmap0_dlg.show()
             self.update_wizard_layers_listView()
             self.country_extend1(self.wizard_quickmap0_dlg.country_comboBox.currentText())
@@ -2144,12 +2145,10 @@ class SaVap:
         self.wizard_quickmap1_dlg.show()  
 
     def close_wizard_quickmap0(self):
-        self.wizard_quickmap0_dlg.close() 
-        self.wizard_clicked = False    
+        self.wizard_quickmap0_dlg.close()  
 
     def close_wizard_quickmap2(self):
         self.wizard_quickmap2_dlg.close() 
-        self.wizard_clicked = False
 
     def wiz_delete_layers_btn_click(self):
         layers = self.iface.legendInterface().layers()
@@ -2208,10 +2207,20 @@ class SaVap:
             self.datasets = self.datasets_temp
             self.fill_table(self.datasets)
 
+    def check_wizard_impact_dialog(self):
+        open_bool = False
+        if self.wizard_impact0_dlg.getOpenBool():
+            open_bool = True
+        if self.wizard_impact1_dlg.getOpenBool():
+            open_bool = True
+        if self.wizard_impact2_dlg.getOpenBool():
+            open_bool = True
+
+        return open_bool
+
     def run_wizard_impact0(self):
         #self.country_downloader('Bangladesh','BGD')
-        if self.wizard1_clicked == False:
-            self.wizard1_clicked = True
+        if self.check_wizard_impact_dialog() == False:
             self.impact_layer_list = []
             self.basemap_default()
             self.country_extend1(self.wizard_impact0_dlg.country_comboBox.currentText())
@@ -2243,8 +2252,7 @@ class SaVap:
 
 
     def close_wizard_impact0(self):
-        self.wizard_impact0_dlg.close() 
-        self.wizard1_clicked = False    
+        self.wizard_impact0_dlg.close()     
         
     def run_wizard_impact1(self):
         self.wizard_impact0_dlg.close()
@@ -2273,7 +2281,6 @@ class SaVap:
 
     def close_wizard_impact2(self):
         self.wizard_impact2_dlg.close() 
-        self.wizard1_clicked = False
 
     def run_country_detail_adm(self):
         self.load_data_country_adm()
@@ -2550,7 +2557,7 @@ class SaVap:
         print "finish"  
         self.analysis_dlg.close()
         
-        if self.wizard1_clicked:
+        if self.check_wizard_impact_dialog():
             self.wizard_impact_trigger()    
         
     def points_in_polygon_analysis1(self,points,poly):
@@ -3017,15 +3024,15 @@ class SaVap:
             if not layer:
                 QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
             else:
-                if self.wizard1_clicked:
+                if self.check_wizard_impact_dialog():
                     self.check_impact_layer("Building",filename)
                 self.building_osm_dlg.close()
         else:
             self.download_osm_building_on_wiz() 
 
-        if self.wizard_clicked:
+        if self.check_wizard_quickmap_dialog():
             self.wizard_quickmap_trigger()
-        if self.wizard1_clicked:
+        if self.check_wizard_impact_dialog():
             self.wizard_impact_trigger()     
             
     def select_file_road(self):
@@ -3051,9 +3058,9 @@ class SaVap:
         else:
             self.download_osm_road_on_wiz()
 
-        if self.wizard_clicked:
+        if self.check_wizard_quickmap_dialog():
             self.wizard_quickmap_trigger()
-        if self.wizard1_clicked:
+        if self.check_wizard_impact_dialog():
             self.wizard_impact_trigger() 
 
     def radio_building_click(self):
@@ -3149,7 +3156,7 @@ class SaVap:
             try:
                 self.load_shapefile(feature_type, output_base_file_path)
 
-                if self.wizard1_clicked:
+                if self.check_wizard_impact_dialog():
                     self.check_impact_layer("Building",feature_type)
             except FileMissingError as exception:
                 print exception.message
