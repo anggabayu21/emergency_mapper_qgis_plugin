@@ -67,6 +67,7 @@ from wizard_quickmap_2 import WizardQuickmap2
 from wizard_impact_0 import WizardImpact0
 from wizard_impact_1 import WizardImpact1
 from wizard_impact_2 import WizardImpact2
+from progress_dialog import ProgressDialog
 
 from adm_countries_downloader import download_country
 
@@ -453,6 +454,7 @@ class SaVap:
 
         self.geobingan_dlg = Geobingan()
         self.import_bm_data_dlg = ImportBMData()
+        self.progress_dialog_dlg = ProgressDialog()
 
         self.analysis_content = ""
         self.result_lbl = ""
@@ -2007,7 +2009,7 @@ class SaVap:
         self.wizard_impact1_dlg.local_btn.hide()
         self.wizard_quickmap1_dlg.vap_btn.hide()
 
-        self.vap_layer_name = ""
+        self.adm_bound_layer_name = ""
 
     def filter_data_quickmap(self):
         country_cb = str(self.wizard_quickmap0_dlg.country_comboBox.currentText()).lower()
@@ -2108,6 +2110,7 @@ class SaVap:
         layer.setSelectedFeatures(ids)
         canvas.zoomToSelected(layer)
         canvas.refresh()
+        layer.removeSelection()
 
     def check_wizard_quickmap_dialog(self):
         open_bool = False
@@ -2121,6 +2124,7 @@ class SaVap:
         return open_bool
 
     def run_wizard_quickmap0(self):
+
         if self.check_wizard_quickmap_dialog() == False:
             self.basemap_default()
             self.wizard_quickmap0_dlg.show()
@@ -2242,7 +2246,7 @@ class SaVap:
 
         if type_data == "VAP" or type_data == "Building":
             poly=QgsMapLayerRegistry.instance().mapLayersByName(layer_name)[0]
-            clip_layer=QgsMapLayerRegistry.instance().mapLayersByName(self.vap_layer_name)[0]
+            clip_layer=QgsMapLayerRegistry.instance().mapLayersByName(self.adm_bound_layer_name)[0]
             new_file_name = "memory4"
             if type_data == "VAP":
                 new_file_name = "memory4"
@@ -2356,6 +2360,15 @@ class SaVap:
                 self.country_detail_adm_dlg.adm3_radio.setDisabled(True)
 
     def country_adm_extend(self, adm_name,layer,field_name):
+        QgsMapLayerRegistry.instance().addMapLayers( [layer] )
+        palyr = QgsPalLayerSettings()
+        palyr.readFromLayer(layer)
+        palyr.enabled = True
+        palyr.fieldName = field_name
+        palyr.placement= QgsPalLayerSettings.OverPoint
+        palyr.setDataDefinedProperty(QgsPalLayerSettings.Size,True,True,'8','')
+        palyr.writeToLayer(layer)
+
         layer_name = layer.name()
         canvas = self.iface.mapCanvas()
         layer.removeSelection()
@@ -2364,51 +2377,73 @@ class SaVap:
         ids = [i.id() for i in it]
         layer.setSelectedFeatures(ids)
         canvas.zoomToSelected(layer)
-        canvas.refresh()     
-        self.vap_layer_name =  layer_name   
+        canvas.refresh()        
 
     def load_country_adm(self):
         idCountry = self.wizard_impact0_dlg.country_comboBox.currentIndex()
         country = self.country_list[idCountry][1]
+        adm = ""
         if self.country_detail_adm_dlg.adm1_radio.isChecked():
             adm = self.country_detail_adm_dlg.adm1_comboBox.currentText()
             path_file = resources_path('countries_admin',self.country_list[idCountry][2],self.country_list[idCountry][2]+'_adm1.shp')
             layer = QgsVectorLayer(path_file, country + " province", 'ogr')
-            QgsMapLayerRegistry.instance().addMapLayers( [layer] )
-            palyr = QgsPalLayerSettings()
-            palyr.readFromLayer(layer)
-            palyr.enabled = True
-            palyr.fieldName = 'NAME_1'
-            palyr.placement= QgsPalLayerSettings.OverPoint
-            palyr.setDataDefinedProperty(QgsPalLayerSettings.Size,True,True,'8','')
-            palyr.writeToLayer(layer)
-            self.country_adm_extend(adm,layer,'NAME_1')
+
+            field_name = 'NAME_1'
+            expr = QgsExpression("\""+field_name+"\"='"+adm+"'")
+            features = layer.getFeatures(QgsFeatureRequest(expr))
+            new_clip_layer =  QgsVectorLayer('Polygon?crs=epsg:4326', adm , "memory")
+            pr = new_clip_layer.dataProvider()
+            for f in features:
+                pr.addFeatures([f])
+            new_clip_layer.updateExtents()
+            QgsMapLayerRegistry.instance().addMapLayers([new_clip_layer])
+            canvas = self.iface.mapCanvas()
+            extent = new_clip_layer.extent()
+            canvas.setExtent(extent)
+            canvas.refresh()     
+
+            #self.country_adm_extend(adm,layer,'NAME_1')
         elif self.country_detail_adm_dlg.adm2_radio.isChecked():
             adm = self.country_detail_adm_dlg.adm2_comboBox.currentText()
             path_file = resources_path('countries_admin',self.country_list[idCountry][2],self.country_list[idCountry][2]+'_adm2.shp')
             layer = QgsVectorLayer(path_file, country + " district", 'ogr')
-            QgsMapLayerRegistry.instance().addMapLayers( [layer] )
-            palyr = QgsPalLayerSettings()
-            palyr.readFromLayer(layer)
-            palyr.enabled = True
-            palyr.fieldName = 'NAME_2'
-            palyr.placement= QgsPalLayerSettings.OverPoint
-            palyr.setDataDefinedProperty(QgsPalLayerSettings.Size,True,True,'8','')
-            palyr.writeToLayer(layer)
-            self.country_adm_extend(adm,layer,'NAME_2')
+
+            field_name = 'NAME_2'
+            expr = QgsExpression("\""+field_name+"\"='"+adm+"'")
+            features = layer.getFeatures(QgsFeatureRequest(expr))
+            new_clip_layer =  QgsVectorLayer('Polygon?crs=epsg:4326', adm , "memory")
+            pr = new_clip_layer.dataProvider()
+            for f in features:
+                pr.addFeatures([f])
+            new_clip_layer.updateExtents()
+            QgsMapLayerRegistry.instance().addMapLayers([new_clip_layer]) 
+            canvas = self.iface.mapCanvas()
+            extent = new_clip_layer.extent()
+            canvas.setExtent(extent)
+            canvas.refresh()
+
+            #self.country_adm_extend(adm,layer,'NAME_2')
         elif self.country_detail_adm_dlg.adm3_radio.isChecked():
             adm = self.country_detail_adm_dlg.adm3_comboBox.currentText()
             path_file = resources_path('countries_admin',self.country_list[idCountry][2],self.country_list[idCountry][2]+'_adm3.shp')
             layer = QgsVectorLayer(path_file, country + " sub-district", 'ogr')
-            QgsMapLayerRegistry.instance().addMapLayers( [layer] )
-            palyr = QgsPalLayerSettings()
-            palyr.readFromLayer(layer)
-            palyr.enabled = True
-            palyr.fieldName = 'NAME_3'
-            palyr.placement= QgsPalLayerSettings.OverPoint
-            palyr.setDataDefinedProperty(QgsPalLayerSettings.Size,True,True,'8','')
-            palyr.writeToLayer(layer)
-            self.country_adm_extend(adm,layer,'NAME_3')
+
+            field_name = 'NAME_3'
+            expr = QgsExpression("\""+field_name+"\"='"+adm+"'")
+            features = layer.getFeatures(QgsFeatureRequest(expr))
+            new_clip_layer =  QgsVectorLayer('Polygon?crs=epsg:4326', adm , "memory")
+            pr = new_clip_layer.dataProvider()
+            for f in features:
+                pr.addFeatures([f])
+            new_clip_layer.updateExtents()
+            QgsMapLayerRegistry.instance().addMapLayers([new_clip_layer]) 
+            canvas = self.iface.mapCanvas()
+            extent = new_clip_layer.extent()
+            canvas.setExtent(extent)
+            canvas.refresh()
+
+            #self.country_adm_extend(adm,layer,'NAME_3')
+        self.adm_bound_layer_name =  adm
         self.country_detail_adm_dlg.close() 
 
     def close_country_detail_adm(self):
@@ -2577,14 +2612,24 @@ class SaVap:
             #alg_processing = Processing.getAlgorithm("qgis:intersection")
             #alg_processing_len = len(alg_processing.parameters)
             print qgis_version()
-            alg = Intersection.Intersection()
-            alg.setParameterValue('INPUT', points)
-            alg.setParameterValue('INPUT2', poly)
-            alg.setParameterValue('IGNORE_NULL', True)
-            alg.setOutputValue('OUTPUT', path_layer)
+            self.progress_dialog_dlg.show()
+            self.progress_dialog_dlg.progress_label.setText('Processing...')
+            print 'processing...'
+
+            try:
+                alg = Intersection.Intersection()
+                alg.setParameterValue('INPUT', points)
+                alg.setParameterValue('INPUT2', poly)
+                alg.setParameterValue('IGNORE_NULL', True)
+                alg.setOutputValue('OUTPUT', path_layer)
+                progress = SilentProgress()
+                alg.processAlgorithm(progress)
+            except IOError as ex:
+                raise IOError(ex)
+                print "analysis alg failed"
+
+            self.progress_dialog_dlg.close()
             
-            progress = SilentProgress()
-            alg.processAlgorithm(progress)
             """
             if qgis_version() >= 21800:
                 processing.runalg("qgis:intersection",points,poly,True,path_layer)
@@ -2700,17 +2745,19 @@ class SaVap:
                 os.remove(path_layer+'.qpj')
                 os.remove(path_layer+'.shx') 
 
+            """
             new_clip_layer =  QgsVectorLayer('Polygon?crs=epsg:4326', clip_layer.name()+'_' , "memory")
             pr = new_clip_layer.dataProvider()
             features = clip_layer.selectedFeatures()
             for f in features:
                 pr.addFeatures([f])
             new_clip_layer.updateExtents()
-            QgsMapLayerRegistry.instance().addMapLayers([new_clip_layer])         
+            QgsMapLayerRegistry.instance().addMapLayers([new_clip_layer])  
+            """       
 
             alg = Clip.Clip()
             alg.setParameterValue('INPUT', input_poly)
-            alg.setParameterValue('OVERLAY', new_clip_layer)
+            alg.setParameterValue('OVERLAY', clip_layer)
             alg.setOutputValue('OUTPUT', path_layer)
             progress = SilentProgress()
             alg.processAlgorithm(progress) 
@@ -2719,7 +2766,7 @@ class SaVap:
 
             if layer.isValid():
                 QgsMapLayerRegistry.instance().removeMapLayer(input_poly.id())
-                QgsMapLayerRegistry.instance().removeMapLayer(new_clip_layer.id()) 
+                #QgsMapLayerRegistry.instance().removeMapLayer(new_clip_layer.id()) 
                 QgsMapLayerRegistry.instance().addMapLayers( [layer] )   
                 canvas = self.iface.mapCanvas()
                 extent = layer.extent()
