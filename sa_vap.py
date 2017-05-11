@@ -1045,7 +1045,11 @@ class SaVap:
                             elif str_keyword.find('mapType:') > -1:
                                 mapType = str_keyword.replace('mapType:','')
                             elif str_keyword.find('typeDisaster:') > -1:
-                                typeDisaster = str_keyword.replace('typeDisaster:','')        
+                                typeDisaster = str_keyword.replace('typeDisaster:','')
+                            elif str_keyword.find('description:') > -1:
+                                descEN = str_keyword.replace('description:','')
+                            elif str_keyword.find('creationDate:') > -1:
+                                creationDate = str_keyword.replace('creationDate:','')        
 
                     webServiceObj = WebServiceParams(name, nameGr,nameEn,sourceGR,sourceEN,creationDate,lastUpdate,
                                                      descEN,descGR,serviceType, layerName,server,QLname,crc,'',country,city,mapType,typeDisaster,mapFormat)
@@ -1091,6 +1095,10 @@ class SaVap:
                             mapType = str_keyword.replace('mapType:','')
                         elif str_keyword.find('typeDisaster:') > -1:
                             typeDisaster = str_keyword.replace('typeDisaster:','')
+                        elif str_keyword.find('description:') > -1:
+                            descEN = str_keyword.replace('description:','')
+                        elif str_keyword.find('creationDate:') > -1:
+                            creationDate = str_keyword.replace('creationDate:','')
                         j += 1       
 
                 webServiceObj = WebServiceParams(name, nameGr,nameEn,sourceGR,sourceEN,creationDate,lastUpdate,
@@ -1144,6 +1152,10 @@ class SaVap:
                             mapType = str_keyword.replace('mapType:','')
                         elif str_keyword.find('typeDisaster:') > -1:
                             typeDisaster = str_keyword.replace('typeDisaster:','') 
+                        elif str_keyword.find('description:') > -1:
+                            descEN = str_keyword.replace('description:','')
+                        elif str_keyword.find('creationDate:') > -1:
+                            creationDate = str_keyword.replace('creationDate:','')
                         j += 1      
 
                 webServiceObj = WebServiceParams(name, nameGr,nameEn,sourceGR,sourceEN,creationDate,lastUpdate,

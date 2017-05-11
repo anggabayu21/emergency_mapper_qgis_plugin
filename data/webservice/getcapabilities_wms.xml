@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE WMT_MS_Capabilities SYSTEM "http://ims.geoinfo.ait.ac.th:8090/geoserver/schemas/wms/1.1.1/WMS_MS_Capabilities.dtd">
-<WMT_MS_Capabilities version="1.1.1" updateSequence="519">
+<WMT_MS_Capabilities version="1.1.1" updateSequence="533">
   <Service>
     <Name>OGC:WMS</Name>
     <Title>GeoServer Web Map Service</Title>
@@ -6522,6 +6522,8 @@
           <Keyword>mapType:Administrative Boundary</Keyword>
           <Keyword>country:Bangladesh</Keyword>
           <Keyword>mapFormat:Vector</Keyword>
+          <Keyword>description:Country Boundary of Bangladesh from Global Administrative Areas</Keyword>
+          <Keyword>creationDate:11/05/2017</Keyword>
         </KeywordList>
         <SRS>EPSG:4326</SRS>
         <LatLonBoundingBox minx="88.01056671142584" miny="20.741111755371207" maxx="92.67366027832038" maxy="26.634399414062756"/>
@@ -6587,7 +6589,7 @@
       <Layer queryable="1" opaque="0">
         <Name>BGD_SGJ_FLOOD_2016</Name>
         <Title>Flood in Sirajganj, Bangladesh 2016</Title>
-        <Abstract/>
+        <Abstract>Value Added Product of Sentinel Activation in Bangladesh, 21 July 2016</Abstract>
         <KeywordList>
           <Keyword>features</Keyword>
           <Keyword>flood</Keyword>
@@ -6595,6 +6597,8 @@
           <Keyword>city:Sirajganj</Keyword>
           <Keyword>mapType:VAP</Keyword>
           <Keyword>mapFormat:Vector</Keyword>
+          <Keyword>typeDisaster:Flood</Keyword>
+          <Keyword>description:Value Added Product of Sentinel Activation in Bangladesh, 21 July 2016</Keyword>
         </KeywordList>
         <SRS>EPSG:4326</SRS>
         <LatLonBoundingBox minx="88.02106412800003" miny="21.946952000000092" maxx="90.48710449720001" maxy="26.156428232200035"/>
@@ -6669,6 +6673,8 @@
           <Keyword>country:Bangladesh</Keyword>
           <Keyword>mapFormat:Raster</Keyword>
           <Keyword>mapType:Population</Keyword>
+          <Keyword>description:Population 2015 of Bangladesh from WorldPop</Keyword>
+          <Keyword>creationDate:11/05/2017</Keyword>
         </KeywordList>
         <SRS>EPSG:4326</SRS>
         <LatLonBoundingBox minx="88.00819111446881" miny="20.576054327247196" maxx="92.68050421446881" maxy="26.634978627247186"/>
@@ -6733,30 +6739,6 @@
           <LegendURL width="20" height="20">
             <Format>image/png</Format>
             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://ims.geoinfo.ait.ac.th:8090/geoserver/sentinel/wms?request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=DEM30_Vietnam"/>
-          </LegendURL>
-        </Style>
-      </Layer>
-      <Layer queryable="1" opaque="0">
-        <Name>Flood Map of Sirajganj, Bangladesh in 31 July 2016</Name>
-        <Title>BGD_FL_Sirajganj_20160731</Title>
-        <Abstract/>
-        <KeywordList>
-          <Keyword>features</Keyword>
-          <Keyword>BGD_FL_Sirajganj_20160731</Keyword>
-          <Keyword>VAP:Yes</Keyword>
-          <Keyword>Map:Flood</Keyword>
-          <Keyword>DisasterType:Flood</Keyword>
-        </KeywordList>
-        <SRS>EPSG:4326</SRS>
-        <LatLonBoundingBox minx="88.302673103358" miny="23.042914804255986" maxx="91.83878421729798" maxy="25.06152591698198"/>
-        <BoundingBox SRS="EPSG:4326" minx="88.302673103358" miny="23.042914804255986" maxx="91.83878421729798" maxy="25.06152591698198"/>
-        <Style>
-          <Name>polygon</Name>
-          <Title>Default Polygon</Title>
-          <Abstract>A sample style that draws a polygon</Abstract>
-          <LegendURL width="20" height="20">
-            <Format>image/png</Format>
-            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://ims.geoinfo.ait.ac.th:8090/geoserver/sentinel/wms?request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=Flood%20Map%20of%20Sirajganj%2C%20Bangladesh%20in%2031%20July%202016"/>
           </LegendURL>
         </Style>
       </Layer>
