@@ -1758,15 +1758,15 @@ class SaVap:
             print data
             for layer in layers:
                 if data == layer.name():
-                    self.analysis_content = self.analysis_content + data + " " + str(self.total_geobingan_data[data]) + '<br>'
+                    self.analysis_content = self.analysis_content + str(self.total_geobingan_data[data]) + ' ' + data + '<br>'
 
         for layer in layers:
-            if layer.name() == 'Affected Building':
+            if layer.name() == 'Affected Buildings':
                 self.analysis_content = self.analysis_content + self.total_affected_building + '<br>'
             elif layer.name() == 'Affected Population':
                 self.analysis_content = self.analysis_content + "Total affected population " + self.total_affected_population + '<br>'
-            elif layer.name() == 'Affected Building (grad)':
-                self.analysis_content = self.analysis_content + "Total affected building " + self.total_affected_building_grad + '<br>'
+            elif layer.name() == 'Affected Buildings (grad)':
+                self.analysis_content = self.analysis_content + "Total affected buildings " + self.total_affected_building_grad + '<br>'
 
         if self.analysis_content != '':
             self.result_lbl = "Result"
@@ -1871,7 +1871,25 @@ class SaVap:
             j = 0        
             for category in geobingan_categories_list:
                 # Specify the geometry type
-                vl = QgsVectorLayer('Point?crs=epsg:4326', category , 'memory')
+                layer_name = category
+                if category == 'Shelter':
+                    layer_name = 'Request for shelter'
+                elif category == 'Rescue':
+                    layer_name = 'Request for rescue service'
+                elif category == 'Water':
+                    layer_name = 'Request for water supply'
+                elif category == 'Landslide':
+                    layer_name = 'Report of landslide'
+                elif category == 'Power Outage':
+                    layer_name = 'Report of power outage'
+                elif category == 'Damage':
+                    layer_name = 'Report of damage'
+                elif category == 'Fire/Other Incident':
+                    layer_name = 'Report of fire/other incident'
+                elif category == 'Flood':
+                    layer_name = 'Report of flood'        
+
+                vl = QgsVectorLayer('Point?crs=epsg:4326', layer_name , 'memory')
                 vl.startEditing()
                 vl.addAttribute(QgsField("category_name", QVariant.String))
                 vl.addAttribute(QgsField("content", QVariant.String))
@@ -1903,7 +1921,7 @@ class SaVap:
                 symbol.setColor(QColor.fromRgb(randint((255/len(geobingan_categories_list)*j),(255/len(geobingan_categories_list)*(j+1))),randint(0,255),randint(0,255)))
                 qgis.utils.iface.mapCanvas().refresh() 
                 qgis.utils.iface.legendInterface().refreshLayerSymbology(vl) 
-                self.total_geobingan_data[category] =  feature_count
+                self.total_geobingan_data[layer_name] =  feature_count
                 j += 1
 
         if total_features > 0:        
@@ -2636,7 +2654,7 @@ class SaVap:
             else:
                 processing.runalg("qgis:intersection",points,poly,path_layer)
             """
-            layer = self.iface.addVectorLayer(path_layer+'.shp', 'Affected Building', "ogr")
+            layer = self.iface.addVectorLayer(path_layer+'.shp', 'Affected Buildings', "ogr")
             
             try:
                 # count total points
@@ -2656,8 +2674,8 @@ class SaVap:
             except IOError as ex:
                 raise IOError(ex)
    
-            self.total_affected_building = "Total affected building " + str(countPoint) + " of "+ str(countPointOriginal)
-            QMessageBox.information(None, "Success:", str("Analysis Success, new layer Affected Building created"))
+            self.total_affected_building = "Total affected buildings " + str(countPoint) + " of "+ str(countPointOriginal)
+            QMessageBox.information(None, "Success:", str("Analysis Success, new layer Affected Buildings created"))
             print countPoint
         except IOError as ex:
             QMessageBox.information(None, "ERROR:", str("Invalid layers"))
@@ -2685,7 +2703,7 @@ class SaVap:
             alg.processAlgorithm(progress)
 
             #processing.runalg("qgis:countpointsinpolygon",poly,points,'NUMPOINTS',path_layer)
-            layer = QgsVectorLayer(path_layer+'.shp', 'Affected Building (grad)', 'ogr')
+            layer = QgsVectorLayer(path_layer+'.shp', 'Affected Buildings (grad)', 'ogr')
 
             targetField = 'NUMPOINTS'
             classes = 5
@@ -2693,7 +2711,7 @@ class SaVap:
                 self.applySymbologyEqualTotalValue(layer, classes, targetField)
                 self.total_affected_building_grad = self.total_analysis_with_grad
                 QgsMapLayerRegistry.instance().addMapLayers( [layer] )   
-                QMessageBox.information(None, "Success:", str("Analysis Success, new layer Affected Building (grad) created"))
+                QMessageBox.information(None, "Success:", str("Analysis Success, new layer Affected Buildings (grad) created"))
         except IOError as ex:
             QMessageBox.information(None, "ERROR:", str("Invalid layers"))
             raise IOError(ex)
