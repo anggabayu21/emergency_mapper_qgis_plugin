@@ -23,9 +23,11 @@
 import sys
 import os
 sys.path.append(os.path.dirname(__file__))
+#sys.path.append('/usr/share/qgis/python/plugins')
 
-import processing
-#from processing.core.Processing import Processing
+#import inasafe_extras.processing
+from inasafe_extras.processing.algs.qgis import Intersection,PointsInPolygon,ZonalStatistics,Clip
+from inasafe_extras.processing.core.SilentProgress import SilentProgress
 
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QObject, SIGNAL, SLOT, QT_VERSION, QFileInfo, QVariant, pyqtSignal
 from PyQt4.QtGui import QAction, QIcon, QTableWidgetItem,QMessageBox,QHeaderView,QFont,QWidget,QTextCursor
@@ -57,6 +59,7 @@ from geobingan import Geobingan
 from location_search import LocationSearch
 from building_osm import BuildingOsm
 from road_osm import RoadOsm
+from country_detail_adm import CountryDetailAdm
 from webService_CLASS import WebServiceParams
 from wizard_quickmap_0 import WizardQuickmap0
 from wizard_quickmap_1 import WizardQuickmap1
@@ -64,6 +67,9 @@ from wizard_quickmap_2 import WizardQuickmap2
 from wizard_impact_0 import WizardImpact0
 from wizard_impact_1 import WizardImpact1
 from wizard_impact_2 import WizardImpact2
+from progress_dialog import ProgressDialog
+
+from adm_countries_downloader import download_country
 
 from utilities import resources_path
 
@@ -75,14 +81,14 @@ from qgis.gui import *
 from qgis.core import *
 from os.path import basename, splitext
 
-from safe.common.version import release_status
-from safe.common.exceptions import TranslationLoadError
-from safe.utilities.resources import resources_path
-from safe.utilities.gis import is_raster_layer, qgis_version,viewport_geo_array,rectangle_geo_array,validate_geo_array
-from safe.utilities.file_downloader import FileDownloader
-from safe.gui.tools.rectangle_map_tool import RectangleMapTool
-from safe.utilities.osm_downloader import download
-from safe.common.exceptions import (
+from inasafe.common.version import release_status
+from inasafe.common.exceptions import TranslationLoadError
+from inasafe.utilities.resources import resources_path
+from inasafe.utilities.gis import is_raster_layer, qgis_version,viewport_geo_array,rectangle_geo_array,validate_geo_array
+from inasafe.utilities.file_downloader import FileDownloader
+from inasafe.gui.tools.rectangle_map_tool import RectangleMapTool
+from inasafe.utilities.osm_downloader import download
+from inasafe.common.exceptions import (
     CanceledImportDialogError,
     FileMissingError)
 from osm_downloader_dialog import OsmDownloaderDialog
@@ -448,20 +454,21 @@ class SaVap:
 
         self.geobingan_dlg = Geobingan()
         self.import_bm_data_dlg = ImportBMData()
+        self.progress_dialog_dlg = ProgressDialog()
 
         self.analysis_content = ""
         self.result_lbl = ""
         self.method_name_global = ""
+        self.total_analysis_with_grad = ""
         self.total_affected_population = ""
+        self.total_affected_building_grad = ""
         self.total_affected_building = ""
         self.total_geobingan_data = {}
         self.init_wizard()
         self.init_location_search()
         self.run()
         self.register_button()
-
-
-
+        self.select_webservice_from = ""
     #--------------------------------------------------------------------------
 
     def onClosePlugin(self):
@@ -528,6 +535,7 @@ class SaVap:
         self.wizard_quickmap0_dlg.next_btn.clicked.connect(self.run_wizard_quickmap1)
         self.wizard_quickmap0_dlg.location_search_btn.clicked.connect(self.run_location_search)
         self.wizard_quickmap0_dlg.cancel_btn.clicked.connect(self.close_wizard_quickmap0)
+        self.wizard_quickmap0_dlg.country_comboBox.currentIndexChanged.connect(lambda: self.country_extend1(self.wizard_quickmap0_dlg.country_comboBox.currentText()))
         self.wizard_quickmap1_dlg.next_btn.clicked.connect(self.run_wizard_quickmap2)
         self.wizard_quickmap1_dlg.back_btn.clicked.connect(self.back_wizard_quickmap1)
         self.wizard_quickmap1_dlg.basemap_btn.clicked.connect(self.run_basemap)
@@ -543,6 +551,8 @@ class SaVap:
         self.wizard_quickmap2_dlg.delete_layers_btn.clicked.connect(self.wiz_delete1_layers_btn_click)
         self.wizard_impact0_dlg.next_btn.clicked.connect(self.run_wizard_impact1)
         self.wizard_impact0_dlg.cancel_btn.clicked.connect(self.close_wizard_impact0)
+        self.wizard_impact0_dlg.select_country_admin_btn.clicked.connect(self.run_country_detail_adm)
+        self.wizard_impact0_dlg.country_comboBox.currentIndexChanged.connect(lambda: self.country_extend1(self.wizard_impact0_dlg.country_comboBox.currentText()))
         self.wizard_impact1_dlg.next_btn.clicked.connect(self.run_wizard_impact2)
         self.wizard_impact1_dlg.back_btn.clicked.connect(self.back_wizard_impact1)
         self.wizard_impact1_dlg.basemap_btn.clicked.connect(self.run_basemap)
@@ -551,6 +561,7 @@ class SaVap:
         self.wizard_impact1_dlg.geobingan_btn.clicked.connect(self.run_geobingan)
         self.wizard_impact1_dlg.local_btn.clicked.connect(self.run_importdata)
         self.wizard_impact1_dlg.delete_layers_btn.clicked.connect(self.wiz1_delete_layers_btn_click)
+        self.wizard_impact1_dlg.run_analysis_btn.clicked.connect(self.run_wizard_analysis)
         self.wizard_impact2_dlg.back_btn.clicked.connect(self.back_wizard_impact2)
         self.wizard_impact2_dlg.export_btn.clicked.connect(self.run_print)
         self.wizard_impact2_dlg.next_btn.clicked.connect(self.close_wizard_impact2)
@@ -572,6 +583,9 @@ class SaVap:
         self.road_osm_dlg.osm_radio.clicked.connect(self.radio_road_click)
         self.road_osm_dlg.local_radio.clicked.connect(self.radio_road_click)
         self.road_osm_dlg.directory_button.clicked.connect(self.road_dir_map)
+        self.country_detail_adm_dlg.ok_btn.clicked.connect(self.load_country_adm)
+        self.country_detail_adm_dlg.cancel_btn.clicked.connect(self.close_country_detail_adm)
+        self.country_detail_adm_dlg.download_button.clicked.connect(self.country_adm_download_button_click)
 
     def run(self):
         """Run method that loads and starts the plugin"""
@@ -669,9 +683,9 @@ class SaVap:
             QMessageBox.information(None, "Error:", failed_import_file)
     
         self.import_data_dlg.close()  
-        if self.wizard_clicked:
+        if self.check_wizard_quickmap_dialog():
             self.wizard_quickmap_trigger()
-        if self.wizard1_clicked:
+        if self.check_wizard_impact_dialog():
             self.wizard_impact_trigger()    
 
     def close_importdata(self):
@@ -697,9 +711,9 @@ class SaVap:
         else:
             self.import_bm_data_dlg.close()
             self.basemap_dlg.close()  
-            if self.wizard_clicked:
+            if self.check_wizard_quickmap_dialog():
                 self.wizard_quickmap_trigger()
-            if self.wizard1_clicked:
+            if self.check_wizard_impact_dialog():
                 self.wizard_impact_trigger()    
 
     def close_importbmdata(self):
@@ -722,9 +736,9 @@ class SaVap:
         layer = self._olLayerTypeRegistry.getById(layer_id)
         layer.addLayer() 
         self.basemap_dlg.close()  
-        if self.wizard_clicked:
+        if self.check_wizard_quickmap_dialog():
             self.wizard_quickmap_trigger()
-        if self.wizard1_clicked:
+        if self.check_wizard_impact_dialog():
             self.wizard_impact_trigger()    
 
     def run_analysis(self):
@@ -826,11 +840,11 @@ class SaVap:
                 True)
 
     def callbackclose(self): 
-        if self.wizard_clicked:
+        if self.check_wizard_quickmap_dialog():
             self.wizard_quickmap_trigger()
             self.wizard_quickmap1_dlg.close()
             self.wizard_quickmap1_dlg.show()
-        if self.wizard1_clicked:
+        if self.check_wizard_impact_dialog():
             self.wizard_impact_trigger()  
             self.wizard_impact1_dlg.close()  
             self.wizard_impact1_dlg.show()  
@@ -905,7 +919,9 @@ class SaVap:
         if self.method_name_global == 'quickmap':
             self.filter_data_quickmap()
         elif self.method_name_global == 'impactmap':
-            self.filter_data_impactmap()   
+            self.filter_data_impactmap('VAP')
+        elif self.method_name_global == 'impactmap1':
+            self.filter_data_impactmap('Population')       
         else:    
             self.init_table()        
 
@@ -1346,7 +1362,10 @@ class SaVap:
         # get the selected row
         dataset_name,dataset_serviceType = self.getSelectedNameAndType()        
         #custom web service object
-        dataset = self.selectdataSets(dataset_name,dataset_serviceType)        
+        dataset = self.selectdataSets(dataset_name,dataset_serviceType)  
+        set_extent = True      
+        if self.check_wizard_impact_dialog():
+            set_extent = False
                 
         urlWithParams = dataset.webServiceParams()  
         print urlWithParams     
@@ -1360,9 +1379,9 @@ class SaVap:
             self.change_canvas_proj(rlayer.crs().authid())
             canvas = self.iface.mapCanvas()
             extent = rlayer.extent()
-            canvas.setExtent(extent)
-            canvas.refresh()
-            print str(extent.xMinimum())+  "," +str(extent.xMaximum())+ ","+ str(extent.yMaximum())+","+str(extent.yMinimum())
+            if set_extent:
+                canvas.setExtent(extent)
+                canvas.refresh()
         elif dataset.serviceType== "WFS":                       
             vlayer = QgsVectorLayer(dataset.webServiceParams(), dataset.getName(self.language), dataset.serviceType)
             #QMessageBox.information(None, "ERROR:", str(dataset.webServiceParams())) 
@@ -1376,8 +1395,9 @@ class SaVap:
             self.change_canvas_proj(vlayer.crs().authid())
             canvas = self.iface.mapCanvas()
             extent = vlayer.extent()
-            canvas.setExtent(extent)
-            canvas.refresh()
+            if set_extent:
+                canvas.setExtent(extent)
+                canvas.refresh()
         elif dataset.serviceType== "WCS":
             output_path = resources_path('webservice', 'data.tif')
             self.download_wcs_tiff(urlWithParams,dataset_name,output_path)
@@ -1385,8 +1405,15 @@ class SaVap:
             self.change_canvas_proj(rlayer.crs().authid())
             canvas = self.iface.mapCanvas()
             extent = rlayer.extent()
-            canvas.setExtent(extent)
-            canvas.refresh()    
+            if set_extent:
+                canvas.setExtent(extent)
+                canvas.refresh()   
+        if self.select_webservice_from == "VAP":
+            self.check_impact_layer("VAP",dataset_name)
+        elif self.select_webservice_from == "Population":
+            self.check_impact_layer("Population",dataset_name)  
+
+        self.select_webservice_from = ""     
         self.closeWebService()    
 
     def showInfo(self):
@@ -1407,18 +1434,24 @@ class SaVap:
 
         self.method_name_global = method_name
 
-        if method_name == False and self.wizard_clicked == True:
+        if method_name == False and self.check_wizard_quickmap_dialog() == True:
             self.datasets = self.datasets_temp
             self.fill_table(self.datasets) 
 
-        if method_name == False and self.wizard1_clicked == True:
+        if method_name == False and self.check_wizard_impact_dialog() == True:
             self.datasets = self.datasets_temp
             self.fill_table(self.datasets)        
 
+        self.select_webservice_from = ""
         if method_name == 'quickmap':
             self.filter_data_quickmap()
+            self.select_webservice_from = ""
         elif method_name == 'impactmap':
-            self.filter_data_impactmap()   
+            self.filter_data_impactmap('VAP') 
+            self.select_webservice_from = "VAP"
+        elif method_name == 'impactmap1':
+            self.filter_data_impactmap('Population') 
+            self.select_webservice_from = "Population"      
 
         # Run the dialog event loop
         result = self.dlg.exec_()
@@ -1438,9 +1471,9 @@ class SaVap:
         self.init_searchBox()
         """close the dialog"""
         self.dlg.close() 
-        if self.wizard_clicked:
+        if self.check_wizard_quickmap_dialog():
             self.wizard_quickmap_trigger('webservice')
-        if self.wizard1_clicked:
+        if self.check_wizard_impact_dialog():
             self.wizard_impact_trigger('webservice')    
 
     #basemap
@@ -1713,9 +1746,9 @@ class SaVap:
                 QMessageBox.information(None, "Success:", str("Create JPG Success, the file can be found in this directory "+full_path))   
 
             self.close_print()
-            if self.wizard_clicked:
+            if self.check_wizard_quickmap_dialog():
                 self.wizard_quickmap_trigger()
-            if self.wizard1_clicked:
+            if self.check_wizard_impact_dialog():
                 self.wizard_impact_trigger() 
 
     def get_total_analysis(self):
@@ -1725,14 +1758,15 @@ class SaVap:
             print data
             for layer in layers:
                 if data == layer.name():
-                    self.analysis_content = self.analysis_content + data + " " + str(self.total_geobingan_data[data]) + '<br>'
+                    self.analysis_content = self.analysis_content + str(self.total_geobingan_data[data]) + ' ' + data + '<br>'
 
         for layer in layers:
-            if layer.name() == 'Affected Building':
+            if layer.name() == 'Affected Buildings':
                 self.analysis_content = self.analysis_content + self.total_affected_building + '<br>'
             elif layer.name() == 'Affected Population':
-                self.analysis_content = self.analysis_content + self.total_affected_population + '<br>'
-
+                self.analysis_content = self.analysis_content + "Total affected population " + self.total_affected_population + '<br>'
+            elif layer.name() == 'Affected Buildings (grad)':
+                self.analysis_content = self.analysis_content + "Total affected buildings " + self.total_affected_building_grad + '<br>'
 
         if self.analysis_content != '':
             self.result_lbl = "Result"
@@ -1753,9 +1787,9 @@ class SaVap:
 
     def close_open_data(self):
         self.open_data_dlg.close()
-        if self.wizard_clicked:
+        if self.check_wizard_quickmap_dialog():
             self.wizard_quickmap_trigger() 
-        if self.wizard1_clicked:
+        if self.check_wizard_impact_dialog():
             self.wizard_impact_trigger()     
 
     def run_geobingan(self):
@@ -1774,9 +1808,9 @@ class SaVap:
         self.download_geobingan_data(bbox_str,self.progress_dialog)
         self.convert_json_vectorpoint()
         self.close_geobingan()
-        if self.wizard_clicked:
+        if self.check_wizard_quickmap_dialog():
             self.wizard_quickmap_trigger()
-        if self.wizard1_clicked:
+        if self.check_wizard_impact_dialog():
             self.wizard_impact_trigger()      
 
     def download_geobingan_data(self,bbox_str,progress_dialog):
@@ -1837,7 +1871,25 @@ class SaVap:
             j = 0        
             for category in geobingan_categories_list:
                 # Specify the geometry type
-                vl = QgsVectorLayer('Point?crs=epsg:4326', category , 'memory')
+                layer_name = category
+                if category == 'Shelter':
+                    layer_name = 'Request for shelter'
+                elif category == 'Rescue':
+                    layer_name = 'Request for rescue service'
+                elif category == 'Water':
+                    layer_name = 'Request for water supply'
+                elif category == 'Landslide':
+                    layer_name = 'Report of landslide'
+                elif category == 'Power Outage':
+                    layer_name = 'Report of power outage'
+                elif category == 'Damage':
+                    layer_name = 'Report of damage'
+                elif category == 'Fire/Other Incident':
+                    layer_name = 'Report of fire/other incident'
+                elif category == 'Flood':
+                    layer_name = 'Report of flood'        
+
+                vl = QgsVectorLayer('Point?crs=epsg:4326', layer_name , 'memory')
                 vl.startEditing()
                 vl.addAttribute(QgsField("category_name", QVariant.String))
                 vl.addAttribute(QgsField("content", QVariant.String))
@@ -1863,12 +1915,13 @@ class SaVap:
                         total_features += 1    
                 vl.commitChanges()   
                 QgsMapLayerRegistry.instance().addMapLayers([vl])
+                vl.removeSelection()
                 symbols = vl.rendererV2().symbols()
                 symbol = symbols[0]
                 symbol.setColor(QColor.fromRgb(randint((255/len(geobingan_categories_list)*j),(255/len(geobingan_categories_list)*(j+1))),randint(0,255),randint(0,255)))
                 qgis.utils.iface.mapCanvas().refresh() 
                 qgis.utils.iface.legendInterface().refreshLayerSymbology(vl) 
-                self.total_geobingan_data[category] =  feature_count
+                self.total_geobingan_data[layer_name] =  feature_count
                 j += 1
 
         if total_features > 0:        
@@ -1881,8 +1934,6 @@ class SaVap:
             
     #wizard part
     def init_wizard(self):
-        self.wizard_clicked = False
-        self.wizard1_clicked = False
         self.select_exposure_data_dlg = SelectExposureData()
         self.wizard_quickmap0_dlg = WizardQuickmap0()
         self.wizard_quickmap1_dlg = WizardQuickmap1()
@@ -1893,8 +1944,47 @@ class SaVap:
 
         self.building_osm_dlg = BuildingOsm()
         self.road_osm_dlg = RoadOsm()
+        self.country_detail_adm_dlg = CountryDetailAdm()
 
-        self.country_list = [['am','Armenia'],['au','Australia'],['az','Azerbaijan'],['bd','Bangladesh'],['bn','Brunei'],['bt','Bhutan'],['cn','China'],['fj','Fiji'],['id','Indonesia'],['in','India'],['ir','Iran'],['jp','Japan'],['kg','Kyrgyzstan'],['kh','Cambodia'],['kr','Republic of Korea'],['kz','Kazakhstan'],['la','Lao PDR'],['lk','Sri Lanka'],['mm','Myanmar'],['mn','Mongolia'],['mv','Maldives'],['my','Malaysia'],['np','Nepal'],['pg','Papua New Guinea'],['ph','Philippines'],['pk','Pakistan'],['ru','Russian Federation'],['sg','Singapore'],['th','Thailand'],['tj','Tajikistan'],['tw','Taiwan'],['uz','Uzbekistan'],['vn','Vietnam'],['ye','Yemen']]
+        self.country_list = [["am","Armenia","ARM","N"],
+        ["au","Australia","AUS","N"],
+        ["az","Azerbaijan","AZE","N"],
+        ["bd","Bangladesh","BGD","N"],
+        ["bt","Bhutan","BTN","N"],
+        ["bn","Brunei","BRN","N"],
+        ["kh","Cambodia","KHM","N"],
+        ["cn","China","CHN","N"],
+        ["fj","Fiji","FJI","N"],
+        ["in","India","IND","N"],
+        ["id","Indonesia","IDN","N"],
+        ["ir","Iran","IRN","N"],
+        ["jp","Japan","JPN","N"],
+        ["kz","Kazakhstan","KAZ","N"],
+        ["kr","Korea","KOR","N"],
+        ["kg","Kyrgyzstan","KGZ","N"],
+        ["la","Lao PDR","LAO","N"],
+        ["my","Malaysia","MYS","N"],
+        ["mv","Maldives","MDV","N"],
+        ["mn","Mongolia","MNG","N"],
+        ["mm","Myanmar","MMR","N"],
+        ["np","Nepal","NPL","N"],
+        ["pk","Pakistan","PAK","N"],
+        ["pg","Papua New Guinea","PNG","N"],
+        ["ph","Philippines","PHL","N"],
+        ["ru","Russia","RUS","N"],
+        ["sg","Singapore","SGP","N"],
+        ["lk","Sri Lanka","LKA","N"],
+        ["tw","Taiwan","TWN","N"],
+        ["tj","Tajikistan","TJK","N"],
+        ["th","Thailand","THA","N"],
+        ["uz","Uzbekistan","UZB","N"],
+        ["vn","Vietnam","VNM","N"],
+        ["ye","Yemen","YEM","N"]]
+
+        if os.path.exists(resources_path('webservice', 'countries.json')) == False:
+            self.create_file_countries_download()
+        else:
+            self.read_file_countries()    
 
         country_cb_list = []
         for country in self.country_list:
@@ -1909,6 +1999,7 @@ class SaVap:
 
         analysis_list = []
         analysis_list.append("Affected Building")
+        analysis_list.append("Affected Building (grad)")
         analysis_list.append("Affected Population")
 
         self.wizard_quickmap0_dlg.country_comboBox.clear()
@@ -1916,18 +2007,27 @@ class SaVap:
 
         self.wizard_quickmap0_dlg.disaster_type_comboBox.clear()
         self.wizard_quickmap0_dlg.disaster_type_comboBox.addItems(disaster_list)
+        self.wizard_quickmap0_dlg.disaster_type_comboBox.hide()
 
         self.wizard_impact0_dlg.country_comboBox.clear()
         self.wizard_impact0_dlg.country_comboBox.addItems(country_cb_list)
 
         self.wizard_impact0_dlg.disaster_type_comboBox.clear()
         self.wizard_impact0_dlg.disaster_type_comboBox.addItems(disaster_list)
+        self.wizard_impact0_dlg.disaster_type_comboBox.hide()
 
         self.wizard_impact0_dlg.analysis_comboBox.clear()
         self.wizard_impact0_dlg.analysis_comboBox.addItems(analysis_list)
 
         self.road_osm_dlg.browse_file_btn.setDisabled(True)
         self.building_osm_dlg.browse_file_btn.setDisabled(True)
+
+        self.wizard_impact1_dlg.basemap_btn.hide()
+        self.wizard_impact1_dlg.geobingan_btn.hide()
+        self.wizard_impact1_dlg.local_btn.hide()
+        self.wizard_quickmap1_dlg.vap_btn.hide()
+
+        self.adm_bound_layer_name = ""
 
     def filter_data_quickmap(self):
         country_cb = str(self.wizard_quickmap0_dlg.country_comboBox.currentText()).lower()
@@ -1952,7 +2052,7 @@ class SaVap:
         self.datasets = foundDatasets
         self.fill_table(foundDatasets)
 
-    def filter_data_impactmap(self):
+    def filter_data_impactmap(self, map_type):
         country_cb = str(self.wizard_impact0_dlg.country_comboBox.currentText()).lower()
         disaster_cb = str(self.wizard_impact0_dlg.disaster_type_comboBox.currentText()).lower()
         foundDatasets = []
@@ -1960,28 +2060,15 @@ class SaVap:
             country = dataset.country.lower()
             disasterType = dataset.typeDisaster.lower()
             mapFormat = dataset.mapFormat.lower()
+            mapType_ = dataset.mapType
             
             if mapFormat == "raster" or mapFormat == "vector":  
-                if country_cb == "all" and disaster_cb != "all":
-                    if disaster_cb in disasterType: 
-                        foundDatasets.append(dataset)
-                elif country_cb == "all" and disaster_cb == "all":  
-                    foundDatasets.append(dataset)
-                elif country_cb != "all" and disaster_cb == "all":
-                    if country_cb in country: 
-                        foundDatasets.append(dataset)  
-                elif country_cb != "all" and disaster_cb != "all":          
-                    if (country_cb in country and disaster_cb == "") or (country_cb in country and disaster_cb in disasterType):            
-                        foundDatasets.append(dataset)
+                if country_cb in country and mapType_ == map_type: 
+                    foundDatasets.append(dataset)  
+               
         #fill the table with the found datasets
         self.datasets = foundDatasets
         self.fill_table(foundDatasets)          
-
-    def run_wizard(self):
-        """Run method that performs all the real work"""
-        # show the dialog
-        self.wizard_clicked = True
-        self.run_basemap()
 
     def basemap_default(self):
         layers = self.iface.legendInterface().layers()
@@ -1992,13 +2079,22 @@ class SaVap:
                 osm_layer_available = True
 
         if osm_layer_available == False:
-            path_layer = resources_path('webservice','ne_110m_land', 'ne_110m_land')
+            self.countries_downloader()
+            self.setMapCrs(self.coordRefSys(4326))
+            path_layer = resources_path('countries_admin','ne_10m_admin_0_countries', 'ne_10m_admin_0_countries')
             layer = self.iface.addVectorLayer(path_layer+'.shp', 'World', "ogr")
-            self.change_canvas_proj(layer.crs().authid())
             canvas = self.iface.mapCanvas()
             extent = layer.extent()
             canvas.setExtent(extent)
             canvas.refresh()
+
+            palyr = QgsPalLayerSettings()
+            palyr.readFromLayer(layer)
+            palyr.enabled = True
+            palyr.fieldName = 'NAME'
+            palyr.placement= QgsPalLayerSettings.OverPoint
+            palyr.setDataDefinedProperty(QgsPalLayerSettings.Size,True,True,'8','')
+            palyr.writeToLayer(layer)
 
     def country_extend(self, idx):
         country = self.country_list[idx]
@@ -2022,13 +2118,37 @@ class SaVap:
         extent = viewport_geo_array(self.iface.mapCanvas())
         self.update_extent_ls(extent)
 
-    def run_wizard_quickmap0(self):
-        self.wizard_clicked = True
-        self.basemap_default()
+    def country_extend1(self, country):
+        canvas = self.iface.mapCanvas()
+        layer = QgsMapLayerRegistry.instance().mapLayersByName('World')[0]
+        layer.removeSelection()
+        expr = QgsExpression("\"NAME\"='"+country+"'")
+        it = layer.getFeatures(QgsFeatureRequest(expr))
+        ids = [i.id() for i in it]
+        layer.setSelectedFeatures(ids)
+        canvas.zoomToSelected(layer)
+        canvas.refresh()
+        layer.removeSelection()
 
-        self.wizard_quickmap0_dlg.show()
-        self.update_wizard_layers_listView()
-        self.country_extend(self.wizard_impact0_dlg.country_comboBox.currentIndex())
+    def check_wizard_quickmap_dialog(self):
+        open_bool = False
+        if self.wizard_quickmap0_dlg.getOpenBool():
+            open_bool = True
+        if self.wizard_quickmap1_dlg.getOpenBool():
+            open_bool = True
+        if self.wizard_quickmap2_dlg.getOpenBool():
+            open_bool = True
+       
+        return open_bool
+
+    def run_wizard_quickmap0(self):
+
+        if self.check_wizard_quickmap_dialog() == False:
+            self.basemap_default()
+            self.wizard_quickmap0_dlg.show()
+            self.update_wizard_layers_listView()
+            self.country_extend1(self.wizard_quickmap0_dlg.country_comboBox.currentText())
+            #self.country_extend(self.wizard_impact0_dlg.country_comboBox.currentIndex())
         
     def run_wizard_quickmap1(self):
         self.wizard_quickmap0_dlg.close()
@@ -2040,19 +2160,17 @@ class SaVap:
         
     def back_wizard_quickmap1(self):
         self.wizard_quickmap1_dlg.close()   
-        self.run_wizard_quickmap0() 
+        self.wizard_quickmap0_dlg.show()
 
     def back_wizard_quickmap2(self):
         self.wizard_quickmap2_dlg.close()   
-        self.run_wizard_quickmap1()     
+        self.wizard_quickmap1_dlg.show()  
 
     def close_wizard_quickmap0(self):
-        self.wizard_quickmap0_dlg.close() 
-        self.wizard_clicked = False    
+        self.wizard_quickmap0_dlg.close()  
 
     def close_wizard_quickmap2(self):
         self.wizard_quickmap2_dlg.close() 
-        self.wizard_clicked = False
 
     def wiz_delete_layers_btn_click(self):
         layers = self.iface.legendInterface().layers()
@@ -2111,23 +2229,65 @@ class SaVap:
             self.datasets = self.datasets_temp
             self.fill_table(self.datasets)
 
+    def check_wizard_impact_dialog(self):
+        open_bool = False
+        if self.wizard_impact0_dlg.getOpenBool():
+            open_bool = True
+        if self.wizard_impact1_dlg.getOpenBool():
+            open_bool = True
+        if self.wizard_impact2_dlg.getOpenBool():
+            open_bool = True
+
+        return open_bool
+
     def run_wizard_impact0(self):
-        self.wizard1_clicked = True
-        self.wizard_impact0_dlg.show()
-        self.update_wizard1_layers_listView()
+        #self.country_downloader('Bangladesh','BGD')
+        if self.check_wizard_impact_dialog() == False:
+            self.impact_layer_list = []
+            self.basemap_default()
+            self.country_extend1(self.wizard_impact0_dlg.country_comboBox.currentText())
+            self.wizard_impact0_dlg.show()
+            self.update_wizard1_layers_listView()
+            
+
+    def check_impact_layer(self,type_data,layer_name):
+        data_exist = False
+        for layer in self.impact_layer_list:
+            if type_data == layer[0]:
+                layer[1] = layer_name
+                data_exist = True
+
+        if data_exist == False:
+            self.impact_layer_list.append([type_data,layer_name])
+        if len(self.impact_layer_list)>=2:
+            self.wizard_impact1_dlg.run_analysis_btn.setDisabled(False)
+
+        if type_data == "VAP" or type_data == "Building":
+            poly=QgsMapLayerRegistry.instance().mapLayersByName(layer_name)[0]
+            clip_layer=QgsMapLayerRegistry.instance().mapLayersByName(self.adm_bound_layer_name)[0]
+            new_file_name = "memory4"
+            if type_data == "VAP":
+                new_file_name = "memory4"
+            elif type_data == "Building":
+                new_file_name = "memory5"
+            self.clip_poly(poly,clip_layer,new_file_name)
+
 
     def close_wizard_impact0(self):
-        self.wizard_impact0_dlg.close() 
-        self.wizard1_clicked = False    
+        self.wizard_impact0_dlg.close()     
         
     def run_wizard_impact1(self):
         self.wizard_impact0_dlg.close()
         self.wizard_impact1_dlg.show()
-        print self.wizard_impact0_dlg.analysis_comboBox.currentText() 
-        if self.wizard_impact0_dlg.analysis_comboBox.currentText() == "Affected Building":
+        if self.wizard_impact0_dlg.analysis_comboBox.currentText() == "Affected Building" or self.wizard_impact0_dlg.analysis_comboBox.currentText() == "Affected Building (grad)":
             self.wizard_impact1_dlg.label_data_analysis.setText("Select building data")
         else:    
             self.wizard_impact1_dlg.label_data_analysis.setText("Select population data")
+
+        if len(self.impact_layer_list)>=2:
+            self.wizard_impact1_dlg.run_analysis_btn.setDisabled(False)    
+        else:
+            self.wizard_impact1_dlg.run_analysis_btn.setDisabled(True)
             
     def run_wizard_impact2(self):
         self.wizard_impact1_dlg.close()
@@ -2135,24 +2295,194 @@ class SaVap:
             
     def back_wizard_impact1(self):
         self.wizard_impact1_dlg.close()   
-        self.run_wizard_impact0() 
+        self.wizard_impact0_dlg.show()
 
     def back_wizard_impact2(self):
         self.wizard_impact2_dlg.close()   
-        self.run_wizard_impact1()   
+        self.wizard_impact1_dlg.show()  
 
     def close_wizard_impact2(self):
         self.wizard_impact2_dlg.close() 
-        self.wizard1_clicked = False
+
+    def run_country_detail_adm(self):
+        self.load_data_country_adm()
+        self.country_detail_adm_dlg.show()
+
+    def country_adm_download_button_click(self):
+        idCountry = self.wizard_impact0_dlg.country_comboBox.currentIndex()
+        self.country_downloader(self.country_list[idCountry][1],self.country_list[idCountry][2])        
+        self.load_data_country_adm()
+
+    def load_data_country_adm(self):
+        idCountry = self.wizard_impact0_dlg.country_comboBox.currentIndex()
+        country = self.country_list[idCountry][1]
+        self.country_detail_adm_dlg.adm1_comboBox.clear()
+        self.country_detail_adm_dlg.adm1_comboBox.setDisabled(True)
+        self.country_detail_adm_dlg.adm1_radio.setDisabled(True)
+        self.country_detail_adm_dlg.adm2_comboBox.clear()
+        self.country_detail_adm_dlg.adm2_comboBox.setDisabled(True)
+        self.country_detail_adm_dlg.adm2_radio.setDisabled(True)
+        self.country_detail_adm_dlg.adm3_comboBox.clear()
+        self.country_detail_adm_dlg.adm3_comboBox.setDisabled(True)
+        self.country_detail_adm_dlg.adm3_radio.setDisabled(True)
+        self.country_detail_adm_dlg.download_label.setText('Administrative boundaries for '+country)
+        if os.path.exists(resources_path('countries_admin', self.country_list[idCountry][2],self.country_list[idCountry][2]+'_adm0.shp')) == False:
+            self.country_detail_adm_dlg.download_button.show()
+
+        else:
+            self.country_detail_adm_dlg.download_button.hide()
+            
+            #adm1
+            path_file = resources_path('countries_admin',self.country_list[idCountry][2],self.country_list[idCountry][2]+'_adm1.shp')
+            self.country_detail_adm_dlg.adm1_comboBox.setDisabled(False)
+            self.country_detail_adm_dlg.adm1_radio.setDisabled(False)
+            layer = QgsVectorLayer(path_file, country, 'ogr')
+            list_adm1 = []
+            for feature in layer.getFeatures():
+                list_adm1.append( feature['NAME_1'] )
+            list_adm1.sort()
+            self.country_detail_adm_dlg.adm1_comboBox.clear()
+            self.country_detail_adm_dlg.adm1_comboBox.addItems(list_adm1)
+
+            #adm2
+            path_file = resources_path('countries_admin',self.country_list[idCountry][2],self.country_list[idCountry][2]+'_adm2.shp')
+            if os.path.exists(path_file):
+                self.country_detail_adm_dlg.adm2_comboBox.setDisabled(False)
+                self.country_detail_adm_dlg.adm2_radio.setDisabled(False)
+                layer = QgsVectorLayer(path_file, country, 'ogr')
+                list_adm2 = []
+                for feature in layer.getFeatures():
+                    list_adm2.append( feature['NAME_2'] )
+
+                list_adm2.sort()
+                self.country_detail_adm_dlg.adm2_comboBox.clear()
+                self.country_detail_adm_dlg.adm2_comboBox.addItems(list_adm2)
+            else:
+                self.country_detail_adm_dlg.adm2_comboBox.setDisabled(True)
+                self.country_detail_adm_dlg.adm2_radio.setDisabled(True)
+
+            #adm3
+            path_file = resources_path('countries_admin',self.country_list[idCountry][2],self.country_list[idCountry][2]+'_adm3.shp')
+            if os.path.exists(path_file):
+                self.country_detail_adm_dlg.adm3_comboBox.setDisabled(False)
+                self.country_detail_adm_dlg.adm3_radio.setDisabled(False)
+                layer = QgsVectorLayer(path_file, country, 'ogr')
+                list_adm3 = []
+                for feature in layer.getFeatures():
+                    list_adm3.append( feature['NAME_3'] )
+                list_adm3.sort()
+                self.country_detail_adm_dlg.adm3_comboBox.clear()
+                self.country_detail_adm_dlg.adm3_comboBox.addItems(list_adm3)
+            else:
+                self.country_detail_adm_dlg.adm3_comboBox.setDisabled(True)
+                self.country_detail_adm_dlg.adm3_radio.setDisabled(True)
+
+    def country_adm_extend(self, adm_name,layer,field_name):
+        QgsMapLayerRegistry.instance().addMapLayers( [layer] )
+        palyr = QgsPalLayerSettings()
+        palyr.readFromLayer(layer)
+        palyr.enabled = True
+        palyr.fieldName = field_name
+        palyr.placement= QgsPalLayerSettings.OverPoint
+        palyr.setDataDefinedProperty(QgsPalLayerSettings.Size,True,True,'8','')
+        palyr.writeToLayer(layer)
+
+        layer_name = layer.name()
+        canvas = self.iface.mapCanvas()
+        layer.removeSelection()
+        expr = QgsExpression("\""+field_name+"\"='"+adm_name+"'")
+        it = layer.getFeatures(QgsFeatureRequest(expr))
+        ids = [i.id() for i in it]
+        layer.setSelectedFeatures(ids)
+        canvas.zoomToSelected(layer)
+        canvas.refresh()        
+
+    def load_country_adm(self):
+        idCountry = self.wizard_impact0_dlg.country_comboBox.currentIndex()
+        country = self.country_list[idCountry][1]
+        adm = ""
+        if self.country_detail_adm_dlg.adm1_radio.isChecked():
+            adm = self.country_detail_adm_dlg.adm1_comboBox.currentText()
+            path_file = resources_path('countries_admin',self.country_list[idCountry][2],self.country_list[idCountry][2]+'_adm1.shp')
+            layer = QgsVectorLayer(path_file, country + " province", 'ogr')
+
+            field_name = 'NAME_1'
+            expr = QgsExpression("\""+field_name+"\"='"+adm+"'")
+            features = layer.getFeatures(QgsFeatureRequest(expr))
+            new_clip_layer =  QgsVectorLayer('Polygon?crs=epsg:4326', adm , "memory")
+            pr = new_clip_layer.dataProvider()
+            for f in features:
+                pr.addFeatures([f])
+            new_clip_layer.updateExtents()
+            QgsMapLayerRegistry.instance().addMapLayers([new_clip_layer])
+            canvas = self.iface.mapCanvas()
+            extent = new_clip_layer.extent()
+            canvas.setExtent(extent)
+            canvas.refresh()     
+
+            #self.country_adm_extend(adm,layer,'NAME_1')
+        elif self.country_detail_adm_dlg.adm2_radio.isChecked():
+            adm = self.country_detail_adm_dlg.adm2_comboBox.currentText()
+            path_file = resources_path('countries_admin',self.country_list[idCountry][2],self.country_list[idCountry][2]+'_adm2.shp')
+            layer = QgsVectorLayer(path_file, country + " district", 'ogr')
+
+            field_name = 'NAME_2'
+            expr = QgsExpression("\""+field_name+"\"='"+adm+"'")
+            features = layer.getFeatures(QgsFeatureRequest(expr))
+            new_clip_layer =  QgsVectorLayer('Polygon?crs=epsg:4326', adm , "memory")
+            pr = new_clip_layer.dataProvider()
+            for f in features:
+                pr.addFeatures([f])
+            new_clip_layer.updateExtents()
+            QgsMapLayerRegistry.instance().addMapLayers([new_clip_layer]) 
+            canvas = self.iface.mapCanvas()
+            extent = new_clip_layer.extent()
+            canvas.setExtent(extent)
+            canvas.refresh()
+
+            #self.country_adm_extend(adm,layer,'NAME_2')
+        elif self.country_detail_adm_dlg.adm3_radio.isChecked():
+            adm = self.country_detail_adm_dlg.adm3_comboBox.currentText()
+            path_file = resources_path('countries_admin',self.country_list[idCountry][2],self.country_list[idCountry][2]+'_adm3.shp')
+            layer = QgsVectorLayer(path_file, country + " sub-district", 'ogr')
+
+            field_name = 'NAME_3'
+            expr = QgsExpression("\""+field_name+"\"='"+adm+"'")
+            features = layer.getFeatures(QgsFeatureRequest(expr))
+            new_clip_layer =  QgsVectorLayer('Polygon?crs=epsg:4326', adm , "memory")
+            pr = new_clip_layer.dataProvider()
+            for f in features:
+                pr.addFeatures([f])
+            new_clip_layer.updateExtents()
+            QgsMapLayerRegistry.instance().addMapLayers([new_clip_layer]) 
+            canvas = self.iface.mapCanvas()
+            extent = new_clip_layer.extent()
+            canvas.setExtent(extent)
+            canvas.refresh()
+
+            #self.country_adm_extend(adm,layer,'NAME_3')
+        self.adm_bound_layer_name =  adm
+        self.country_detail_adm_dlg.close() 
+
+    def close_country_detail_adm(self):
+        self.country_detail_adm_dlg.close()           
 
     def wiz1_delete_layers_btn_click(self):
         layers = self.iface.legendInterface().layers()
-        layer_list = []
         i = 0
-        for layer in layers:
+        new_layer = []
+        for layer in self.impact_layer_list:
             if self.model_impact.item(i).checkState() == 2:
-                QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+                QgsMapLayerRegistry.instance().removeMapLayer(QgsMapLayerRegistry.instance().mapLayersByName(layer[1])[0])
+            else:
+                new_layer.append(layer)
             i += 1 
+
+        self.impact_layer_list = new_layer
+        if len(self.impact_layer_list)>=2:
+            self.wizard_impact1_dlg.run_analysis_btn.setDisabled(False)    
+        else:
+            self.wizard_impact1_dlg.run_analysis_btn.setDisabled(True)
         self.update_wizard1_layers_listView()
 
     def wiz1_delete1_layers_btn_click(self):
@@ -2174,16 +2504,16 @@ class SaVap:
         self.model_impact = QStandardItemModel(list)
         self.model1_impact = QStandardItemModel(list1)
          
-        layers = self.iface.legendInterface().layers()
-        layer_list = []
-        for layer in layers:
+        for layer in self.impact_layer_list:
             # create an item with a caption
-            item = QStandardItem(layer.name())
+            item = QStandardItem(layer[1])
             # add a checkbox to it
             item.setCheckable(True)
             # Add the item to the model
             self.model_impact.appendRow(item)
 
+        layers = self.iface.legendInterface().layers()
+        for layer in layers:
             # create an item with a caption
             item1 = QStandardItem(layer.name())
             # add a checkbox to it
@@ -2196,6 +2526,46 @@ class SaVap:
         # Apply the model to the list view
         list.setModel(self.model_impact)
         list1.setModel(self.model1_impact)
+
+    def run_wizard_analysis(self):
+        if self.wizard_impact0_dlg.analysis_comboBox.currentText() == "Affected Building":
+            points = None
+            poly = None
+            for layer in self.impact_layer_list:
+                if layer[0] == "Building":
+                    points=QgsMapLayerRegistry.instance().mapLayersByName(layer[1])[0]
+                if layer[0] == "VAP":
+                    poly=QgsMapLayerRegistry.instance().mapLayersByName(layer[1])[0] 
+            if points != None and poly != None:        
+                self.points_in_polygon_analysis1(points,poly)
+            else:
+                QMessageBox.information(None, "ERROR:", str("Layers not correct"))
+        elif self.wizard_impact0_dlg.analysis_comboBox.currentText() == "Affected Population": 
+            raster = None
+            poly = None
+            for layer in self.impact_layer_list:
+                if layer[0] == "Population":
+                    raster=QgsMapLayerRegistry.instance().mapLayersByName(layer[1])[0]
+                if layer[0] == "VAP":
+                    poly=QgsMapLayerRegistry.instance().mapLayersByName(layer[1])[0] 
+            if raster != None and poly != None:        
+                self.population_analysis(raster,poly)
+            else:
+                QMessageBox.information(None, "ERROR:", str("Layers not correct"))
+        elif self.wizard_impact0_dlg.analysis_comboBox.currentText() == "Affected Building (grad)":
+            points = None
+            poly = None
+            for layer in self.impact_layer_list:
+                if layer[0] == "Building":
+                    points=QgsMapLayerRegistry.instance().mapLayersByName(layer[1])[0]
+                if layer[0] == "VAP":
+                    poly=QgsMapLayerRegistry.instance().mapLayersByName(layer[1])[0] 
+            if points != None and poly != None:        
+                self.points_in_polygon_analysis2(points,poly)
+            else:
+                QMessageBox.information(None, "ERROR:", str("Layers not correct"))
+
+        self.update_wizard1_layers_listView()        
         
     def wizard_impact_trigger(self,method_name=''):
         self.update_wizard1_layers_listView() 
@@ -2218,25 +2588,32 @@ class SaVap:
         self.select_exposure_data_dlg.close()   
 
     def select_analysis_data(self):
-        if self.wizard_impact0_dlg.analysis_comboBox.currentText() == "Affected Building":
+        if self.wizard_impact0_dlg.analysis_comboBox.currentText() == "Affected Building" or self.wizard_impact0_dlg.analysis_comboBox.currentText() == "Affected Building (grad)":
             self.show_building_osm()
         else:
-            self.run_loadwebservice('impactmap')          
+            self.run_loadwebservice('impactmap1')          
             
     def execute_analysis(self):
-        if self.execute_analysis_clicked:
-            print self.analysis_dlg.affected_building_radio.isChecked()
-            if self.analysis_dlg.affected_building_radio.isChecked():
-                self.points_in_polygon_analysis1()
-            elif self.analysis_dlg.affected_population_radio.isChecked():
-                self.population_analysis()
+        if self.analysis_dlg.affected_building_radio.isChecked():
+            points=QgsMapLayerRegistry.instance().mapLayersByName(self.analysis_dlg.exposure_layer_comboBox.currentText())[0]
+            poly=QgsMapLayerRegistry.instance().mapLayersByName(self.analysis_dlg.hazard_layer_comboBox.currentText())[0]
+            self.points_in_polygon_analysis1(points,poly)
+        elif self.analysis_dlg.affected_population_radio.isChecked():
+            raster=QgsMapLayerRegistry.instance().mapLayersByName(self.analysis_dlg.exposure_layer_comboBox.currentText())[0]
+            poly=QgsMapLayerRegistry.instance().mapLayersByName(self.analysis_dlg.hazard_layer_comboBox.currentText())[0]
+            self.population_analysis(raster,poly)
+        elif self.analysis_dlg.affected_building1_radio.isChecked():
+            points=QgsMapLayerRegistry.instance().mapLayersByName(self.analysis_dlg.exposure_layer_comboBox.currentText())[0]
+            poly=QgsMapLayerRegistry.instance().mapLayersByName(self.analysis_dlg.hazard_layer_comboBox.currentText())[0]
+            self.points_in_polygon_analysis2(points,poly)    
 
-            self.execute_analysis_clicked = False
+        print "finish"  
+        self.analysis_dlg.close()
         
-    def points_in_polygon_analysis1(self):
-        points=QgsMapLayerRegistry.instance().mapLayersByName(self.analysis_dlg.exposure_layer_comboBox.currentText())[0]
-        poly=QgsMapLayerRegistry.instance().mapLayersByName(self.analysis_dlg.hazard_layer_comboBox.currentText())[0]
-
+        if self.check_wizard_impact_dialog():
+            self.wizard_impact_trigger()    
+        
+    def points_in_polygon_analysis1(self,points,poly):
         try:
             path_layer = resources_path('webservice', 'memory1')
 
@@ -2253,13 +2630,31 @@ class SaVap:
             #alg_processing = Processing.getAlgorithm("qgis:intersection")
             #alg_processing_len = len(alg_processing.parameters)
             print qgis_version()
+            self.progress_dialog_dlg.show()
+            self.progress_dialog_dlg.progress_label.setText('Processing...')
+            print 'processing...'
+
+            try:
+                alg = Intersection.Intersection()
+                alg.setParameterValue('INPUT', points)
+                alg.setParameterValue('INPUT2', poly)
+                alg.setParameterValue('IGNORE_NULL', True)
+                alg.setOutputValue('OUTPUT', path_layer)
+                progress = SilentProgress()
+                alg.processAlgorithm(progress)
+            except IOError as ex:
+                raise IOError(ex)
+                print "analysis alg failed"
+
+            self.progress_dialog_dlg.close()
             
+            """
             if qgis_version() >= 21800:
                 processing.runalg("qgis:intersection",points,poly,True,path_layer)
             else:
                 processing.runalg("qgis:intersection",points,poly,path_layer)
-
-            layer = self.iface.addVectorLayer(path_layer+'.shp', 'Affected Building', "ogr")
+            """
+            layer = self.iface.addVectorLayer(path_layer+'.shp', 'Affected Buildings', "ogr")
             
             try:
                 # count total points
@@ -2279,23 +2674,16 @@ class SaVap:
             except IOError as ex:
                 raise IOError(ex)
    
-            self.total_affected_building = "Total affected building " + str(countPoint) + " of "+ str(countPointOriginal)
-            
+            self.total_affected_building = "Total affected buildings " + str(countPoint) + " of "+ str(countPointOriginal)
+            QMessageBox.information(None, "Success:", str("Analysis Success, new layer Affected Buildings created"))
             print countPoint
         except IOError as ex:
             QMessageBox.information(None, "ERROR:", str("Invalid layers"))
             raise IOError(ex)
                  
-        print "finish"  
-        self.analysis_dlg.close()
         
-        if self.wizard1_clicked:
-            self.wizard_impact_trigger()
 
-    def points_in_polygon_analysis2(self):
-        raster=QgsMapLayerRegistry.instance().mapLayersByName(self.analysis_dlg.exposure_layer_comboBox.currentText())[0]
-        poly=QgsMapLayerRegistry.instance().mapLayersByName(self.analysis_dlg.hazard_layer_comboBox.currentText())[0]
-
+    def points_in_polygon_analysis2(self,points,poly):
         try:
             path_layer = resources_path('webservice', 'memory3')
 
@@ -2306,29 +2694,31 @@ class SaVap:
                 os.remove(path_layer+'.qpj')
                 os.remove(path_layer+'.shx')
 
-            processing.runalg("qgis:zonalstatistics",raster,1,poly,'_',False,path_layer)
-            layer = QgsVectorLayer(path_layer+'.shp', 'Affected Population', 'ogr')
+            alg = PointsInPolygon.PointsInPolygon()
+            alg.setParameterValue('POLYGONS', poly)
+            alg.setParameterValue('POINTS', points)
+            alg.setParameterValue('FIELD', 'NUMPOINTS')
+            alg.setOutputValue('OUTPUT', path_layer)
+            progress = SilentProgress()
+            alg.processAlgorithm(progress)
 
-            targetField = '_count'
+            #processing.runalg("qgis:countpointsinpolygon",poly,points,'NUMPOINTS',path_layer)
+            layer = QgsVectorLayer(path_layer+'.shp', 'Affected Buildings (grad)', 'ogr')
+
+            targetField = 'NUMPOINTS'
             classes = 5
             if layer.isValid():
                 self.applySymbologyEqualTotalValue(layer, classes, targetField)
+                self.total_affected_building_grad = self.total_analysis_with_grad
                 QgsMapLayerRegistry.instance().addMapLayers( [layer] )   
+                QMessageBox.information(None, "Success:", str("Analysis Success, new layer Affected Buildings (grad) created"))
         except IOError as ex:
             QMessageBox.information(None, "ERROR:", str("Invalid layers"))
             raise IOError(ex)
 
-        #print countPoint                 
-        print "finish"  
-        self.analysis_dlg.close()
-        
-        if self.wizard1_clicked:
-            self.wizard_impact_trigger()        
+              
 
-    def population_analysis(self):
-        raster=QgsMapLayerRegistry.instance().mapLayersByName(self.analysis_dlg.exposure_layer_comboBox.currentText())[0]
-        poly=QgsMapLayerRegistry.instance().mapLayersByName(self.analysis_dlg.hazard_layer_comboBox.currentText())[0]
-
+    def population_analysis(self,raster,poly):
         try:
             path_layer = resources_path('webservice', 'memory2')
 
@@ -2339,24 +2729,71 @@ class SaVap:
                 os.remove(path_layer+'.qpj')
                 os.remove(path_layer+'.shx')
 
-            processing.runalg("qgis:zonalstatistics",raster,1,poly,'_',False,path_layer)
+            alg = ZonalStatistics.ZonalStatistics()
+            alg.setParameterValue('INPUT_RASTER', raster)
+            alg.setParameterValue('RASTER_BAND', 1)
+            alg.setParameterValue('INPUT_VECTOR', poly)
+            alg.setParameterValue('COLUMN_PREFIX', '_')
+            alg.setParameterValue('GLOBAL_EXTENT', False)
+            alg.setOutputValue('OUTPUT_LAYER', path_layer)
+            progress = SilentProgress()
+            alg.processAlgorithm(progress)
+            #processing.runalg("qgis:zonalstatistics",raster,1,poly,'_',False,path_layer)
             layer = QgsVectorLayer(path_layer+'.shp', 'Affected Population', 'ogr')
 
             targetField = '_count'
             classes = 5
             if layer.isValid():
                 self.applySymbologyEqualTotalValue(layer, classes, targetField)
+                self.total_affected_population = self.total_analysis_with_grad
                 QgsMapLayerRegistry.instance().addMapLayers( [layer] )   
+                QMessageBox.information(None, "Success:", str("Analysis Success, new layer Affected Population created"))
         except IOError as ex:
             QMessageBox.information(None, "ERROR:", str("Invalid layers"))
             raise IOError(ex)
 
-        #print countPoint                 
-        print "finish"  
-        self.analysis_dlg.close()
-        
-        if self.wizard1_clicked:
-            self.wizard_impact_trigger()  
+    def clip_poly(self,input_poly,clip_layer,new_file_name):
+        try:
+            path_layer = resources_path('webservice', new_file_name)
+            layer_name = input_poly.name()
+            if os.path.exists(resources_path('webservice', new_file_name+'.shp')):
+                os.remove(path_layer+'.shp')
+                os.remove(path_layer+'.dbf')
+                os.remove(path_layer+'.prj')
+                os.remove(path_layer+'.qpj')
+                os.remove(path_layer+'.shx') 
+
+            """
+            new_clip_layer =  QgsVectorLayer('Polygon?crs=epsg:4326', clip_layer.name()+'_' , "memory")
+            pr = new_clip_layer.dataProvider()
+            features = clip_layer.selectedFeatures()
+            for f in features:
+                pr.addFeatures([f])
+            new_clip_layer.updateExtents()
+            QgsMapLayerRegistry.instance().addMapLayers([new_clip_layer])  
+            """       
+
+            alg = Clip.Clip()
+            alg.setParameterValue('INPUT', input_poly)
+            alg.setParameterValue('OVERLAY', clip_layer)
+            alg.setOutputValue('OUTPUT', path_layer)
+            progress = SilentProgress()
+            alg.processAlgorithm(progress) 
+
+            layer = QgsVectorLayer(path_layer+'.shp', layer_name, 'ogr')
+
+            if layer.isValid():
+                QgsMapLayerRegistry.instance().removeMapLayer(input_poly.id())
+                #QgsMapLayerRegistry.instance().removeMapLayer(new_clip_layer.id()) 
+                QgsMapLayerRegistry.instance().addMapLayers( [layer] )   
+                canvas = self.iface.mapCanvas()
+                extent = layer.extent()
+                canvas.setExtent(extent)
+                canvas.refresh()
+        except IOError as ex:
+            QMessageBox.information(None, "ERROR:", str("Clip failed"))
+            raise IOError(ex)
+         
 
     def getSortedFloatsFromAttributeTable( self, layer, fieldName ):
         values = []
@@ -2403,7 +2840,7 @@ class SaVap:
         values = self.getSortedFloatsFromAttributeTable( layer, fieldName )
         total = sum( values )
 
-        self.total_affected_population = "Total affected population " + str( int(total))
+        self.total_analysis_with_grad = str( int(total))
 
         step = total / float( classes )
         nextStep = step
@@ -2436,7 +2873,8 @@ class SaVap:
     #search location
     def run_location_search(self):
         self.location_search_dlg.show()
-        self.country_extend(self.wizard_impact0_dlg.country_comboBox.currentIndex())
+        self.country_extend1(self.wizard_quickmap0_dlg.country_comboBox.currentText())
+        #self.country_extend(self.wizard_impact0_dlg.country_comboBox.currentIndex())
 
     def init_location_search(self):
         self.location_search_dlg = LocationSearch()
@@ -2577,6 +3015,7 @@ class SaVap:
         newExtent = QgsRectangle(oldExtent)
         newExtent.scale(1, newCenter)
         self.canvas.setExtent(newExtent)
+        self.canvas.zoomScale(4000)
         self.canvas.refresh()    
 
     def update_extent_ls(self, extent):
@@ -2650,9 +3089,16 @@ class SaVap:
             if not layer:
                 QMessageBox.information(None, "Error:", str("Only shapefile, geojson, kml and tiff file is allowed"))
             else:
+                if self.check_wizard_impact_dialog():
+                    self.check_impact_layer("Building",filename)
                 self.building_osm_dlg.close()
         else:
             self.download_osm_building_on_wiz() 
+
+        if self.check_wizard_quickmap_dialog():
+            self.wizard_quickmap_trigger()
+        if self.check_wizard_impact_dialog():
+            self.wizard_impact_trigger()     
             
     def select_file_road(self):
         filepath = QFileDialog.getOpenFileName()
@@ -2675,7 +3121,12 @@ class SaVap:
             else:
                 self.road_osm_dlg.close()
         else:
-            self.download_osm_road_on_wiz()    
+            self.download_osm_road_on_wiz()
+
+        if self.check_wizard_quickmap_dialog():
+            self.wizard_quickmap_trigger()
+        if self.check_wizard_impact_dialog():
+            self.wizard_impact_trigger() 
 
     def radio_building_click(self):
         if self.building_osm_dlg.osm_radio.isChecked():
@@ -2707,7 +3158,7 @@ class SaVap:
             feature_type = "roads"
 
             output_directory = self.road_osm_dlg.output_directory.text()
-            output_prefix = "roads"
+            output_prefix = ""
             overwrite = True
             output_base_file_path = self.get_output_base_path(
                 output_directory, output_prefix, feature_type, overwrite)
@@ -2749,18 +3200,15 @@ class SaVap:
         try:
             extent = viewport_geo_array(self.iface.mapCanvas())
             feature_type = "buildings"
-            if self.wizard1_clicked:
-                feature_type = "building-points"
-
             output_directory = self.building_osm_dlg.output_directory.text()
-            output_prefix = "buildings"
+            output_prefix = ""
             overwrite = True
             output_base_file_path = self.get_output_base_path(
                 output_directory, output_prefix, feature_type, overwrite)
 
             self.progress_dialog = QProgressDialog()
             self.progress_dialog.setAutoClose(False)
-            title = self.tr('Road osm download')
+            title = self.tr('Building osm download')
             self.progress_dialog.setWindowTitle(title)
 
             # noinspection PyTypeChecker
@@ -2772,6 +3220,9 @@ class SaVap:
 
             try:
                 self.load_shapefile(feature_type, output_base_file_path)
+
+                if self.check_wizard_impact_dialog():
+                    self.check_impact_layer("Building",feature_type)
             except FileMissingError as exception:
                 print exception.message
                 QMessageBox.information(None, "Error:", str("Error download OSM data"))
@@ -2869,7 +3320,113 @@ class SaVap:
                         'Your current projection is different than EPSG:4326. '
                         'You should enable \'on the fly\' to display '
                         'correctly your layers')
-                )                 
+                )      
+
+    def create_file_countries_download(self):
+        json_str = "["
+        i = 0
+        total_data = len(self.country_list)
+        for country in self.country_list:
+            json_str = json_str + '{ "code1" : "'+country[0]+'", "country" : "'+country[1]+'", "code2" : "'+country[2]+'", "download" : "'+country[3]+'"}'
+            i += 1
+            if i != total_data:
+                json_str = json_str + ','
+        json_str = json_str + "]"            
+        #{data : [{code1 : '', country : '', code2 : '', download : 'Y'}]}
+        file = open(resources_path('webservice', 'countries.json'), 'w')
+        file.write(json_str)
+        file.close()
+
+    def read_file_countries(self):
+        json_data = open(resources_path('webservice', 'countries.json'))
+        data = json.load(json_data)
+        json_data.close()
+        total_data = len(data)
+        self.country_list = []
+        for i in range(0,(total_data - 1)):
+            self.country_list.append([data[i]["code1"],data[i]["country"],data[i]["code2"],data[i]["download"]])
+            
+    def country_downloader(self,country,country_prefix):
+        try:
+            output_directory = resources_path('countries_admin',country_prefix)
+            
+            self.progress_dialog = QProgressDialog()
+            self.progress_dialog.setAutoClose(False)
+            title = self.tr(country+' download')
+            self.progress_dialog.setWindowTitle(title)
+
+            # noinspection PyTypeChecker
+            download_country(
+                country_prefix,
+                output_directory,
+                self.progress_dialog)
+
+            
+            try:
+                path_file = resources_path('countries_admin',country_prefix,country_prefix+'_adm0.shp')
+                layer = QgsVectorLayer(path_file, country, 'ogr')
+                #QgsMapLayerRegistry.instance().addMapLayers( [layer] )   
+
+                country_list = []
+                for country_ in self.country_list:
+                    if country_[1] == country:
+                        country_[2] = country_prefix
+                        country_[3] = 'Y'
+    
+                    country_list.append(country_)   
+                self.country_list = country_list
+                self.create_file_countries_download()        
+            except FileMissingError as exception:
+                print exception.message
+                QMessageBox.information(None, "Error:", str("Error download country"))
+            
+        except CanceledImportDialogError:
+            # don't show anything because this exception raised
+            # when user canceling the import process directly
+            pass
+        except Exception as exception:  # pylint: disable=broad-except
+            # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
+            QMessageBox.information(None, "Error:", str(exception.message))
+
+            self.progress_dialog.cancel()
+
+        finally:
+            # Unlock the bounding_box_group
+            pass  
+
+
+    def countries_downloader(self):
+        if os.path.exists(resources_path('countries_admin', 'ne_10m_admin_0_countries','ne_10m_admin_0_countries.shp')) == False:
+            try:
+                output_directory = resources_path('countries_admin','ne_10m_admin_0_countries')
+                
+                self.progress_dialog = QProgressDialog()
+                self.progress_dialog.setAutoClose(False)
+                title = self.tr('Countries Adm. download')
+                self.progress_dialog.setWindowTitle(title)
+
+                country = 'ne_10m_admin_0_countries'
+
+                # noinspection PyTypeChecker
+                download_country(
+                    country,
+                    output_directory,
+                    self.progress_dialog)
+
+            except CanceledImportDialogError:
+                # don't show anything because this exception raised
+                # when user canceling the import process directly
+                pass
+            except Exception as exception:  # pylint: disable=broad-except
+                # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
+                QMessageBox.information(None, "Error:", str(exception.message))
+
+                self.progress_dialog.cancel()
+
+            finally:
+                # Unlock the bounding_box_group
+                pass
+
                   
 
 

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>404</width>
+    <width>397</width>
     <height>293</height>
    </rect>
   </property>
@@ -112,6 +112,19 @@
    </property>
    <property name="text">
     <string>Affected Population</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="affected_building1_radio">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>20</y>
+     <width>201</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Affected Building (grad)</string>
    </property>
   </widget>
  </widget>

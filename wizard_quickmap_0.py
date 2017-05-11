@@ -39,6 +39,17 @@ class WizardQuickmap0(QtGui.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.open_bool = False
+
+    def closeEvent(self, evnt):
+        #evnt.ignore()
+        self.open_bool = False
+
+    def showEvent(self, evnt):
+        self.open_bool = True
+
+    def getOpenBool(self):
+        return self.open_bool  
     
 
         

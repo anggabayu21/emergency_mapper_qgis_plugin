@@ -127,8 +127,8 @@
   <widget class="QPushButton" name="vap_btn">
    <property name="geometry">
     <rect>
-     <x>580</x>
-     <y>290</y>
+     <x>570</x>
+     <y>400</y>
      <width>141</width>
      <height>27</height>
     </rect>
