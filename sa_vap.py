@@ -94,7 +94,7 @@ from inasafe.common.exceptions import (
 from osm_downloader_dialog import OsmDownloaderDialog
 
 from random import randint
-from time import gmtime, strftime
+from time import gmtime, strftime, localtime
 import time
 import json
 
@@ -1720,7 +1720,7 @@ class SaVap:
             title_item.setText(self.print_dlg.title_lineedit.text())
 
             date_time_item = comp.composition().getComposerItemById('date_time')
-            date_time_item.setText(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+            date_time_item.setText(strftime("%Y-%m-%d %H:%M:%S", localtime()))
 
             note_item = comp.composition().getComposerItemById('note')
             note_item.setText(self.print_dlg.note_lineedit.text())
@@ -1801,6 +1801,7 @@ class SaVap:
 
         if self.analysis_content != '':
             self.result_lbl = "Result"
+            self.analysis_content = "<div style='font-size:4px;'>" + self.analysis_content + "</div>"
         else:
             self.result_lbl = ""             
 
