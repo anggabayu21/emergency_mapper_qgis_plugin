@@ -1735,7 +1735,7 @@ class SaVap:
             result_lbl_item = comp.composition().getComposerItemById('result_lbl')
             result_lbl_item.setText(self.result_lbl)
 
-            logo_path = resources_path('img','logo.png')
+            logo_path = resources_path('img','sentinel_asia.png')
             savap_logo = comp.composition().getComposerItemById('organisation-logo')
             if qgis_version() < 20600:
                 savap_logo.setPictureFile(logo_path)
