@@ -71,13 +71,12 @@ class WebServiceParams:
         country = unicode(country, 'utf-8')
         return country 
 
-    def getTypeDisaster(self, language):
+    def getTypeDisaster(self):
         # check the language
         typeDisaster = self.typeDisaster            
         typeDisaster = unicode(typeDisaster, 'utf-8')
         return typeDisaster        
 		
-	
     def webServiceParams(self):
 
         if self.serviceType == "WMS":          
