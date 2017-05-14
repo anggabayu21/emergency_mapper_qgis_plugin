@@ -25,9 +25,9 @@ import os
 sys.path.append(os.path.dirname(__file__))
 #sys.path.append('/usr/share/qgis/python/plugins')
 
-#import inasafe_extras.processing
-from inasafe_extras.processing.algs.qgis import Intersection,PointsInPolygon,ZonalStatistics,Clip
-from inasafe_extras.processing.core.SilentProgress import SilentProgress
+import processing
+#from inasafe_extras.processing.algs.qgis import Intersection,PointsInPolygon,ZonalStatistics,Clip
+#from inasafe_extras.processing.core.SilentProgress import SilentProgress
 
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QObject, SIGNAL, SLOT, QT_VERSION, QFileInfo, QVariant, pyqtSignal
 from PyQt4.QtGui import QAction, QIcon, QTableWidgetItem,QMessageBox,QHeaderView,QFont,QWidget,QTextCursor
@@ -94,7 +94,7 @@ from inasafe.common.exceptions import (
 from osm_downloader_dialog import OsmDownloaderDialog
 
 from random import randint
-from time import gmtime, strftime
+from time import gmtime, strftime, localtime
 import time
 import json
 
@@ -1045,7 +1045,11 @@ class SaVap:
                             elif str_keyword.find('mapType:') > -1:
                                 mapType = str_keyword.replace('mapType:','')
                             elif str_keyword.find('typeDisaster:') > -1:
-                                typeDisaster = str_keyword.replace('typeDisaster:','')        
+                                typeDisaster = str_keyword.replace('typeDisaster:','')
+                            elif str_keyword.find('description:') > -1:
+                                descEN = str_keyword.replace('description:','')
+                            elif str_keyword.find('creationDate:') > -1:
+                                creationDate = str_keyword.replace('creationDate:','')        
 
                     webServiceObj = WebServiceParams(name, nameGr,nameEn,sourceGR,sourceEN,creationDate,lastUpdate,
                                                      descEN,descGR,serviceType, layerName,server,QLname,crc,'',country,city,mapType,typeDisaster,mapFormat)
@@ -1091,6 +1095,10 @@ class SaVap:
                             mapType = str_keyword.replace('mapType:','')
                         elif str_keyword.find('typeDisaster:') > -1:
                             typeDisaster = str_keyword.replace('typeDisaster:','')
+                        elif str_keyword.find('description:') > -1:
+                            descEN = str_keyword.replace('description:','')
+                        elif str_keyword.find('creationDate:') > -1:
+                            creationDate = str_keyword.replace('creationDate:','')
                         j += 1       
 
                 webServiceObj = WebServiceParams(name, nameGr,nameEn,sourceGR,sourceEN,creationDate,lastUpdate,
@@ -1144,6 +1152,10 @@ class SaVap:
                             mapType = str_keyword.replace('mapType:','')
                         elif str_keyword.find('typeDisaster:') > -1:
                             typeDisaster = str_keyword.replace('typeDisaster:','') 
+                        elif str_keyword.find('description:') > -1:
+                            descEN = str_keyword.replace('description:','')
+                        elif str_keyword.find('creationDate:') > -1:
+                            creationDate = str_keyword.replace('creationDate:','')
                         j += 1      
 
                 webServiceObj = WebServiceParams(name, nameGr,nameEn,sourceGR,sourceEN,creationDate,lastUpdate,
@@ -1379,9 +1391,18 @@ class SaVap:
             self.change_canvas_proj(rlayer.crs().authid())
             canvas = self.iface.mapCanvas()
             extent = rlayer.extent()
+
+            symbols = rlayer.rendererV2().symbols()
+            symbol = symbols[0]
+            if dataset.getTypeDisaster() == "Flood":    
+                symbol.setColor(QColor.fromRgb(67,198,249))
+            else:
+                symbol.setColor(QColor.fromRgb(206,107,26))
+
             if set_extent:
                 canvas.setExtent(extent)
                 canvas.refresh()
+            qgis.utils.iface.legendInterface().refreshLayerSymbology(rlayer) 
         elif dataset.serviceType== "WFS":                       
             vlayer = QgsVectorLayer(dataset.webServiceParams(), dataset.getName(self.language), dataset.serviceType)
             #QMessageBox.information(None, "ERROR:", str(dataset.webServiceParams())) 
@@ -1395,9 +1416,18 @@ class SaVap:
             self.change_canvas_proj(vlayer.crs().authid())
             canvas = self.iface.mapCanvas()
             extent = vlayer.extent()
+
+            symbols = vlayer.rendererV2().symbols()
+            symbol = symbols[0]
+            if dataset.getTypeDisaster() == "Flood":    
+                symbol.setColor(QColor.fromRgb(67,198,249))
+            else:
+                symbol.setColor(QColor.fromRgb(206,107,26))
+
             if set_extent:
                 canvas.setExtent(extent)
                 canvas.refresh()
+            qgis.utils.iface.legendInterface().refreshLayerSymbology(vlayer)
         elif dataset.serviceType== "WCS":
             output_path = resources_path('webservice', 'data.tif')
             self.download_wcs_tiff(urlWithParams,dataset_name,output_path)
@@ -1405,6 +1435,7 @@ class SaVap:
             self.change_canvas_proj(rlayer.crs().authid())
             canvas = self.iface.mapCanvas()
             extent = rlayer.extent()
+
             if set_extent:
                 canvas.setExtent(extent)
                 canvas.refresh()   
@@ -1689,7 +1720,7 @@ class SaVap:
             title_item.setText(self.print_dlg.title_lineedit.text())
 
             date_time_item = comp.composition().getComposerItemById('date_time')
-            date_time_item.setText(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+            date_time_item.setText(strftime("%Y-%m-%d %H:%M:%S", localtime()))
 
             note_item = comp.composition().getComposerItemById('note')
             note_item.setText(self.print_dlg.note_lineedit.text())
@@ -1704,7 +1735,7 @@ class SaVap:
             result_lbl_item = comp.composition().getComposerItemById('result_lbl')
             result_lbl_item.setText(self.result_lbl)
 
-            logo_path = resources_path('img','logo.png')
+            logo_path = resources_path('img','sentinel_asia.png')
             savap_logo = comp.composition().getComposerItemById('organisation-logo')
             if qgis_version() < 20600:
                 savap_logo.setPictureFile(logo_path)
@@ -1770,6 +1801,7 @@ class SaVap:
 
         if self.analysis_content != '':
             self.result_lbl = "Result"
+            self.analysis_content = "<div style='font-size:4px;'>" + self.analysis_content + "</div>"
         else:
             self.result_lbl = ""             
 
@@ -2083,10 +2115,16 @@ class SaVap:
             self.setMapCrs(self.coordRefSys(4326))
             path_layer = resources_path('countries_admin','ne_10m_admin_0_countries', 'ne_10m_admin_0_countries')
             layer = self.iface.addVectorLayer(path_layer+'.shp', 'World', "ogr")
+            
+            symbols = layer.rendererV2().symbols()
+            symbol = symbols[0]
+            symbol.setColor(QColor.fromRgb(255,255,255))
+
             canvas = self.iface.mapCanvas()
             extent = layer.extent()
             canvas.setExtent(extent)
             canvas.refresh()
+            qgis.utils.iface.legendInterface().refreshLayerSymbology(layer) 
 
             palyr = QgsPalLayerSettings()
             palyr.readFromLayer(layer)
@@ -2095,6 +2133,13 @@ class SaVap:
             palyr.placement= QgsPalLayerSettings.OverPoint
             palyr.setDataDefinedProperty(QgsPalLayerSettings.Size,True,True,'8','')
             palyr.writeToLayer(layer)
+
+    def delete_basemap(self):
+        layers = self.iface.legendInterface().layers()
+        for layer in layers:
+            # create an item with a caption
+            if layer.name() == 'World':
+                QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
 
     def country_extend(self, idx):
         country = self.country_list[idx]
@@ -2157,10 +2202,13 @@ class SaVap:
     def run_wizard_quickmap2(self):
         self.wizard_quickmap1_dlg.close()
         self.wizard_quickmap2_dlg.show()
+        self.delete_basemap()
+        self.update_wizard_layers_listView()
         
     def back_wizard_quickmap1(self):
         self.wizard_quickmap1_dlg.close()   
         self.wizard_quickmap0_dlg.show()
+        self.basemap_default()
 
     def back_wizard_quickmap2(self):
         self.wizard_quickmap2_dlg.close()   
@@ -2270,7 +2318,7 @@ class SaVap:
                 new_file_name = "memory4"
             elif type_data == "Building":
                 new_file_name = "memory5"
-            self.clip_poly(poly,clip_layer,new_file_name)
+            self.clip_poly(poly,clip_layer,new_file_name,type_data)
 
 
     def close_wizard_impact0(self):
@@ -2292,10 +2340,13 @@ class SaVap:
     def run_wizard_impact2(self):
         self.wizard_impact1_dlg.close()
         self.wizard_impact2_dlg.show()
+        self.delete_basemap()
+        self.update_wizard1_layers_listView()
             
     def back_wizard_impact1(self):
         self.wizard_impact1_dlg.close()   
         self.wizard_impact0_dlg.show()
+        self.basemap_default()
 
     def back_wizard_impact2(self):
         self.wizard_impact2_dlg.close()   
@@ -2415,10 +2466,15 @@ class SaVap:
                 pr.addFeatures([f])
             new_clip_layer.updateExtents()
             QgsMapLayerRegistry.instance().addMapLayers([new_clip_layer])
+            symbols = new_clip_layer.rendererV2().symbols()
+            symbol = symbols[0]
+            symbol.setColor(QColor.fromRgb(0,255,3))
+
             canvas = self.iface.mapCanvas()
             extent = new_clip_layer.extent()
             canvas.setExtent(extent)
             canvas.refresh()     
+            qgis.utils.iface.legendInterface().refreshLayerSymbology(new_clip_layer) 
 
             #self.country_adm_extend(adm,layer,'NAME_1')
         elif self.country_detail_adm_dlg.adm2_radio.isChecked():
@@ -2435,10 +2491,15 @@ class SaVap:
                 pr.addFeatures([f])
             new_clip_layer.updateExtents()
             QgsMapLayerRegistry.instance().addMapLayers([new_clip_layer]) 
+            symbols = new_clip_layer.rendererV2().symbols()
+            symbol = symbols[0]
+            symbol.setColor(QColor.fromRgb(0,255,3))
+
             canvas = self.iface.mapCanvas()
             extent = new_clip_layer.extent()
             canvas.setExtent(extent)
             canvas.refresh()
+            qgis.utils.iface.legendInterface().refreshLayerSymbology(new_clip_layer) 
 
             #self.country_adm_extend(adm,layer,'NAME_2')
         elif self.country_detail_adm_dlg.adm3_radio.isChecked():
@@ -2455,10 +2516,15 @@ class SaVap:
                 pr.addFeatures([f])
             new_clip_layer.updateExtents()
             QgsMapLayerRegistry.instance().addMapLayers([new_clip_layer]) 
+            symbols = new_clip_layer.rendererV2().symbols()
+            symbol = symbols[0]
+            symbol.setColor(QColor.fromRgb(0,255,3))
+
             canvas = self.iface.mapCanvas()
             extent = new_clip_layer.extent()
             canvas.setExtent(extent)
             canvas.refresh()
+            qgis.utils.iface.legendInterface().refreshLayerSymbology(new_clip_layer) 
 
             #self.country_adm_extend(adm,layer,'NAME_3')
         self.adm_bound_layer_name =  adm
@@ -2634,6 +2700,7 @@ class SaVap:
             self.progress_dialog_dlg.progress_label.setText('Processing...')
             print 'processing...'
 
+            """
             try:
                 alg = Intersection.Intersection()
                 alg.setParameterValue('INPUT', points)
@@ -2645,15 +2712,16 @@ class SaVap:
             except IOError as ex:
                 raise IOError(ex)
                 print "analysis alg failed"
-
-            self.progress_dialog_dlg.close()
-            
             """
+            
+            
+            
             if qgis_version() >= 21800:
                 processing.runalg("qgis:intersection",points,poly,True,path_layer)
             else:
                 processing.runalg("qgis:intersection",points,poly,path_layer)
-            """
+            
+            self.progress_dialog_dlg.close()
             layer = self.iface.addVectorLayer(path_layer+'.shp', 'Affected Buildings', "ogr")
             
             try:
@@ -2694,6 +2762,7 @@ class SaVap:
                 os.remove(path_layer+'.qpj')
                 os.remove(path_layer+'.shx')
 
+            """
             alg = PointsInPolygon.PointsInPolygon()
             alg.setParameterValue('POLYGONS', poly)
             alg.setParameterValue('POINTS', points)
@@ -2701,8 +2770,9 @@ class SaVap:
             alg.setOutputValue('OUTPUT', path_layer)
             progress = SilentProgress()
             alg.processAlgorithm(progress)
+            """
 
-            #processing.runalg("qgis:countpointsinpolygon",poly,points,'NUMPOINTS',path_layer)
+            processing.runalg("qgis:countpointsinpolygon",poly,points,'NUMPOINTS',path_layer)
             layer = QgsVectorLayer(path_layer+'.shp', 'Affected Buildings (grad)', 'ogr')
 
             targetField = 'NUMPOINTS'
@@ -2729,6 +2799,7 @@ class SaVap:
                 os.remove(path_layer+'.qpj')
                 os.remove(path_layer+'.shx')
 
+            """
             alg = ZonalStatistics.ZonalStatistics()
             alg.setParameterValue('INPUT_RASTER', raster)
             alg.setParameterValue('RASTER_BAND', 1)
@@ -2738,7 +2809,9 @@ class SaVap:
             alg.setOutputValue('OUTPUT_LAYER', path_layer)
             progress = SilentProgress()
             alg.processAlgorithm(progress)
-            #processing.runalg("qgis:zonalstatistics",raster,1,poly,'_',False,path_layer)
+            """
+
+            processing.runalg("qgis:zonalstatistics",raster,1,poly,'_',False,path_layer)
             layer = QgsVectorLayer(path_layer+'.shp', 'Affected Population', 'ogr')
 
             targetField = '_count'
@@ -2752,7 +2825,7 @@ class SaVap:
             QMessageBox.information(None, "ERROR:", str("Invalid layers"))
             raise IOError(ex)
 
-    def clip_poly(self,input_poly,clip_layer,new_file_name):
+    def clip_poly(self,input_poly,clip_layer,new_file_name, layer_type):
         try:
             path_layer = resources_path('webservice', new_file_name)
             layer_name = input_poly.name()
@@ -2761,26 +2834,29 @@ class SaVap:
                 os.remove(path_layer+'.dbf')
                 os.remove(path_layer+'.prj')
                 os.remove(path_layer+'.qpj')
-                os.remove(path_layer+'.shx') 
+                os.remove(path_layer+'.shx')   
 
             """
-            new_clip_layer =  QgsVectorLayer('Polygon?crs=epsg:4326', clip_layer.name()+'_' , "memory")
-            pr = new_clip_layer.dataProvider()
-            features = clip_layer.selectedFeatures()
-            for f in features:
-                pr.addFeatures([f])
-            new_clip_layer.updateExtents()
-            QgsMapLayerRegistry.instance().addMapLayers([new_clip_layer])  
-            """       
-
             alg = Clip.Clip()
             alg.setParameterValue('INPUT', input_poly)
             alg.setParameterValue('OVERLAY', clip_layer)
             alg.setOutputValue('OUTPUT', path_layer)
             progress = SilentProgress()
             alg.processAlgorithm(progress) 
+            """
+
+            processing.runalg("qgis:clip",input_poly,clip_layer,path_layer)
 
             layer = QgsVectorLayer(path_layer+'.shp', layer_name, 'ogr')
+
+            symbols = layer.rendererV2().symbols()
+            symbol = symbols[0]
+            if layer_type == "VAP":    
+                symbol.setColor(QColor.fromRgb(67,198,249))
+            elif layer_type == "Building":    
+                symbol.setColor(QColor.fromRgb(175,172,172))
+            else:
+                symbol.setColor(QColor.fromRgb(206,107,26))
 
             if layer.isValid():
                 QgsMapLayerRegistry.instance().removeMapLayer(input_poly.id())
@@ -2790,6 +2866,7 @@ class SaVap:
                 extent = layer.extent()
                 canvas.setExtent(extent)
                 canvas.refresh()
+                qgis.utils.iface.legendInterface().refreshLayerSymbology(layer) 
         except IOError as ex:
             QMessageBox.information(None, "ERROR:", str("Clip failed"))
             raise IOError(ex)
@@ -2874,6 +2951,9 @@ class SaVap:
     def run_location_search(self):
         self.location_search_dlg.show()
         self.country_extend1(self.wizard_quickmap0_dlg.country_comboBox.currentText())
+        self.location_search_dlg.eText.setText("")
+        self.location_search_dlg.eOutput.clear()
+        self.location_search_dlg.search_result_lbl.setText('0 result')
         #self.country_extend(self.wizard_impact0_dlg.country_comboBox.currentIndex())
 
     def init_location_search(self):
@@ -2905,8 +2985,7 @@ class SaVap:
 
         self.rectangle_map_tool = \
             RectangleMapTool(self.canvas)
-        self.rectangle_map_tool.rectangle_created.connect(
-            self.update_extent_from_rectangle)
+        self.rectangle_map_tool.rectangle_created.connect(self.update_extent_from_rectangle)
 
         # Setup pan tool
         self.pan_tool = QgsMapToolPan(self.canvas)
@@ -3015,7 +3094,7 @@ class SaVap:
         newExtent = QgsRectangle(oldExtent)
         newExtent.scale(1, newCenter)
         self.canvas.setExtent(newExtent)
-        self.canvas.zoomScale(4000)
+        self.canvas.zoomScale(6000)
         self.canvas.refresh()    
 
     def update_extent_ls(self, extent):
@@ -3054,6 +3133,8 @@ class SaVap:
                 self.tr('Bounding box from rectangle'))
             extent = rectangle_geo_array(rectangle, self.iface.mapCanvas())
             self.update_extent_ls(extent) 
+            self.canvas.setExtent(rectangle)
+            self.canvas.refresh()
 
     def close_location_search(self):
         self.location_search_dlg.close()
@@ -3081,6 +3162,9 @@ class SaVap:
             filename = splitext(basename(filepath))[0]
             if extention_file == ".shp" or extention_file == ".geojson" or extention_file == ".kml":
                 layer = self.iface.addVectorLayer(filepath, filename, "ogr")
+                #symbols = layer.rendererV2().symbols()
+                #symbol = symbols[0]
+                #symbol.setColor(QColor.fromRgb(175,172,172))
             elif extention_file == ".tif":    
                 layer = self.iface.addRasterLayer(filepath, filename)
             else:
