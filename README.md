@@ -7,9 +7,6 @@ System Requirements
 
  - A standard PC with at least 4GB of RAM running Windows, Linux or Mac OS X
  - The QGIS Open Source Geographic Information System (http://www.qgis.org).
-   Although InaSAFE will probably run on any version of QGIS version above 2.0
-   or newer, our supported version is the latest Long Term Release version
-   of QGIS.
 
 Installation 
 -------------------
@@ -80,7 +77,7 @@ repository page like this::
 License
 =======
 
-InaSAFE is free software: you can redistribute it and/or modify it
+Emergency Mapper is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License version 3 (GPLv3) as
 published by the Free Software Foundation.
 
