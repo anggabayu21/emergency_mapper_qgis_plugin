@@ -2,7 +2,7 @@
 
 """
 ***************************************************************************
-    __init__.py
+    CreateNewModelAction.py
     ---------------------
     Date                 : August 2012
     Copyright            : (C) 2012 by Victor Olaya
@@ -25,14 +25,26 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '93c55caa41f16a598bbdb1893892cbb342e150cf'
 
-from processing.tools.dataobjects import *          # NOQA
-from processing.tools.general import *              # NOQA
-from processing.tools.vector import *               # NOQA
-from processing.tools.raster import *               # NOQA
-from processing.tools.system import *               # NOQA
-#from processing.tests.TestData import loadTestData  # NOQA
+import os
+from qgis.PyQt.QtGui import QIcon
+from processing.gui.ToolboxAction import ToolboxAction
+from processing.modeler.ModelerDialog import ModelerDialog
+from processing.core.alglist import algList
+
+pluginPath = os.path.split(os.path.dirname(__file__))[0]
 
 
-#def classFactory(iface):
-#    from processing.ProcessingPlugin import ProcessingPlugin
-#    return ProcessingPlugin(iface)
+class CreateNewModelAction(ToolboxAction):
+
+    def __init__(self):
+        self.name, self.i18n_name = self.trAction('Create new model')
+        self.group, self.i18n_group = self.trAction('Tools')
+
+    def getIcon(self):
+        return QIcon(os.path.join(pluginPath, 'images', 'model.png'))
+
+    def execute(self):
+        dlg = ModelerDialog()
+        dlg.exec_()
+        if dlg.update:
+            algList.reloadProvider('model')

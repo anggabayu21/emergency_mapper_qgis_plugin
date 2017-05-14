@@ -2,7 +2,7 @@
 
 """
 ***************************************************************************
-    __init__.py
+    ModelerUtils.py
     ---------------------
     Date                 : August 2012
     Copyright            : (C) 2012 by Victor Olaya
@@ -25,14 +25,26 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '93c55caa41f16a598bbdb1893892cbb342e150cf'
 
-from processing.tools.dataobjects import *          # NOQA
-from processing.tools.general import *              # NOQA
-from processing.tools.vector import *               # NOQA
-from processing.tools.raster import *               # NOQA
-from processing.tools.system import *               # NOQA
-#from processing.tests.TestData import loadTestData  # NOQA
+import os
+from processing.tools.system import userFolder, mkdir
+from processing.core.ProcessingConfig import ProcessingConfig
 
 
-#def classFactory(iface):
-#    from processing.ProcessingPlugin import ProcessingPlugin
-#    return ProcessingPlugin(iface)
+class ModelerUtils:
+
+    MODELS_FOLDER = 'MODELS_FOLDER'
+    ACTIVATE_MODELS = 'ACTIVATE_MODELS'
+
+    @staticmethod
+    def defaultModelsFolder():
+        folder = unicode(os.path.join(userFolder(), 'models'))
+        mkdir(folder)
+        return os.path.abspath(folder)
+
+    @staticmethod
+    def modelsFolders():
+        folder = ProcessingConfig.getSetting(ModelerUtils.MODELS_FOLDER)
+        if folder is not None:
+            return folder.split(';')
+        else:
+            return [ModelerUtils.defaultModelsFolder()]

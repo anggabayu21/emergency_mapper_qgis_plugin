@@ -2,7 +2,7 @@
 
 """
 ***************************************************************************
-    __init__.py
+    EditModelAction.py
     ---------------------
     Date                 : August 2012
     Copyright            : (C) 2012 by Victor Olaya
@@ -25,14 +25,22 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '93c55caa41f16a598bbdb1893892cbb342e150cf'
 
-from processing.tools.dataobjects import *          # NOQA
-from processing.tools.general import *              # NOQA
-from processing.tools.vector import *               # NOQA
-from processing.tools.raster import *               # NOQA
-from processing.tools.system import *               # NOQA
-#from processing.tests.TestData import loadTestData  # NOQA
+from processing.gui.ContextAction import ContextAction
+from processing.modeler.ModelerAlgorithm import ModelerAlgorithm
+from processing.modeler.ModelerDialog import ModelerDialog
+from processing.core.alglist import algList
 
 
-#def classFactory(iface):
-#    from processing.ProcessingPlugin import ProcessingPlugin
-#    return ProcessingPlugin(iface)
+class EditModelAction(ContextAction):
+
+    def __init__(self):
+        self.name = self.tr('Edit model', 'EditModelAction')
+
+    def isEnabled(self):
+        return isinstance(self.itemData, ModelerAlgorithm)
+
+    def execute(self):
+        dlg = ModelerDialog(self.itemData.getCopy())
+        dlg.exec_()
+        if dlg.update:
+            algList.reloadProvider('model')

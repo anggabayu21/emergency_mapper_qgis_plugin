@@ -2,7 +2,7 @@
 
 """
 ***************************************************************************
-    __init__.py
+    RenderingStyleFilePanel.py
     ---------------------
     Date                 : August 2012
     Copyright            : (C) 2012 by Victor Olaya
@@ -25,14 +25,38 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '93c55caa41f16a598bbdb1893892cbb342e150cf'
 
-from processing.tools.dataobjects import *          # NOQA
-from processing.tools.general import *              # NOQA
-from processing.tools.vector import *               # NOQA
-from processing.tools.raster import *               # NOQA
-from processing.tools.system import *               # NOQA
-#from processing.tests.TestData import loadTestData  # NOQA
+import os
+
+from qgis.PyQt import uic
+from qgis.PyQt.QtWidgets import QFileDialog
+
+from processing.tools.system import isWindows
+
+pluginPath = os.path.split(os.path.dirname(__file__))[0]
+WIDGET, BASE = uic.loadUiType(
+    os.path.join(pluginPath, 'ui', 'widgetBaseSelector.ui'))
 
 
-#def classFactory(iface):
-#    from processing.ProcessingPlugin import ProcessingPlugin
-#    return ProcessingPlugin(iface)
+class RenderingStyleFilePanel(BASE, WIDGET):
+
+    def __init__(self):
+        super(RenderingStyleFilePanel, self).__init__(None)
+        self.setupUi(self)
+
+        self.btnSelect.clicked.connect(self.showSelectionDialog)
+
+    def showSelectionDialog(self):
+        filename = QFileDialog.getOpenFileName(self,
+                                               self.tr('Select style file'), '',
+                                               self.tr('QGIS Layer Style File (*.qml *.QML)'))
+        if filename:
+            self.leText.setText(filename)
+
+    def setText(self, text):
+        self.leText.setText(text)
+
+    def getValue(self):
+        s = self.leText.text()
+        if isWindows():
+            s = s.replace('\\', '/')
+        return s

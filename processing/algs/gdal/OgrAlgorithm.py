@@ -2,9 +2,9 @@
 
 """
 ***************************************************************************
-    __init__.py
+    OgrAlgorithm.py
     ---------------------
-    Date                 : August 2012
+    Date                 : November 2012
     Copyright            : (C) 2012 by Victor Olaya
     Email                : volayaf at gmail dot com
 ***************************************************************************
@@ -18,21 +18,21 @@
 """
 
 __author__ = 'Victor Olaya'
-__date__ = 'August 2012'
+__date__ = 'November 2012'
 __copyright__ = '(C) 2012, Victor Olaya'
 
 # This will get replaced with a git SHA1 when you do a git archive
 
 __revision__ = '93c55caa41f16a598bbdb1893892cbb342e150cf'
 
-from processing.tools.dataobjects import *          # NOQA
-from processing.tools.general import *              # NOQA
-from processing.tools.vector import *               # NOQA
-from processing.tools.raster import *               # NOQA
-from processing.tools.system import *               # NOQA
-#from processing.tests.TestData import loadTestData  # NOQA
+from processing.algs.gdal.GdalAlgorithm import GdalAlgorithm
+from processing.tools import vector
 
 
-#def classFactory(iface):
-#    from processing.ProcessingPlugin import ProcessingPlugin
-#    return ProcessingPlugin(iface)
+class OgrAlgorithm(GdalAlgorithm):
+
+    def ogrConnectionString(self, uri):
+        return vector.ogrConnectionString(uri)
+
+    def ogrLayerName(self, uri):
+        return vector.ogrLayerName(uri)

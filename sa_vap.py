@@ -25,9 +25,9 @@ import os
 sys.path.append(os.path.dirname(__file__))
 #sys.path.append('/usr/share/qgis/python/plugins')
 
-#import inasafe_extras.processing
-from inasafe_extras.processing.algs.qgis import Intersection,PointsInPolygon,ZonalStatistics,Clip
-from inasafe_extras.processing.core.SilentProgress import SilentProgress
+import processing
+#from inasafe_extras.processing.algs.qgis import Intersection,PointsInPolygon,ZonalStatistics,Clip
+#from inasafe_extras.processing.core.SilentProgress import SilentProgress
 
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QObject, SIGNAL, SLOT, QT_VERSION, QFileInfo, QVariant, pyqtSignal
 from PyQt4.QtGui import QAction, QIcon, QTableWidgetItem,QMessageBox,QHeaderView,QFont,QWidget,QTextCursor
@@ -2700,6 +2700,7 @@ class SaVap:
             self.progress_dialog_dlg.progress_label.setText('Processing...')
             print 'processing...'
 
+            """
             try:
                 alg = Intersection.Intersection()
                 alg.setParameterValue('INPUT', points)
@@ -2711,15 +2712,16 @@ class SaVap:
             except IOError as ex:
                 raise IOError(ex)
                 print "analysis alg failed"
-
-            self.progress_dialog_dlg.close()
-            
             """
+            
+            
+            
             if qgis_version() >= 21800:
                 processing.runalg("qgis:intersection",points,poly,True,path_layer)
             else:
                 processing.runalg("qgis:intersection",points,poly,path_layer)
-            """
+            
+            self.progress_dialog_dlg.close()
             layer = self.iface.addVectorLayer(path_layer+'.shp', 'Affected Buildings', "ogr")
             
             try:
@@ -2760,6 +2762,7 @@ class SaVap:
                 os.remove(path_layer+'.qpj')
                 os.remove(path_layer+'.shx')
 
+            """
             alg = PointsInPolygon.PointsInPolygon()
             alg.setParameterValue('POLYGONS', poly)
             alg.setParameterValue('POINTS', points)
@@ -2767,8 +2770,9 @@ class SaVap:
             alg.setOutputValue('OUTPUT', path_layer)
             progress = SilentProgress()
             alg.processAlgorithm(progress)
+            """
 
-            #processing.runalg("qgis:countpointsinpolygon",poly,points,'NUMPOINTS',path_layer)
+            processing.runalg("qgis:countpointsinpolygon",poly,points,'NUMPOINTS',path_layer)
             layer = QgsVectorLayer(path_layer+'.shp', 'Affected Buildings (grad)', 'ogr')
 
             targetField = 'NUMPOINTS'
@@ -2795,6 +2799,7 @@ class SaVap:
                 os.remove(path_layer+'.qpj')
                 os.remove(path_layer+'.shx')
 
+            """
             alg = ZonalStatistics.ZonalStatistics()
             alg.setParameterValue('INPUT_RASTER', raster)
             alg.setParameterValue('RASTER_BAND', 1)
@@ -2804,7 +2809,9 @@ class SaVap:
             alg.setOutputValue('OUTPUT_LAYER', path_layer)
             progress = SilentProgress()
             alg.processAlgorithm(progress)
-            #processing.runalg("qgis:zonalstatistics",raster,1,poly,'_',False,path_layer)
+            """
+
+            processing.runalg("qgis:zonalstatistics",raster,1,poly,'_',False,path_layer)
             layer = QgsVectorLayer(path_layer+'.shp', 'Affected Population', 'ogr')
 
             targetField = '_count'
@@ -2829,12 +2836,16 @@ class SaVap:
                 os.remove(path_layer+'.qpj')
                 os.remove(path_layer+'.shx')   
 
+            """
             alg = Clip.Clip()
             alg.setParameterValue('INPUT', input_poly)
             alg.setParameterValue('OVERLAY', clip_layer)
             alg.setOutputValue('OUTPUT', path_layer)
             progress = SilentProgress()
             alg.processAlgorithm(progress) 
+            """
+
+            processing.runalg("qgis:clip",input_poly,clip_layer,path_layer)
 
             layer = QgsVectorLayer(path_layer+'.shp', layer_name, 'ogr')
 

@@ -2,7 +2,7 @@
 
 """
 ***************************************************************************
-    __init__.py
+    ModelerOnlyAlgorithmProvider.py
     ---------------------
     Date                 : August 2012
     Copyright            : (C) 2012 by Victor Olaya
@@ -25,14 +25,33 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '93c55caa41f16a598bbdb1893892cbb342e150cf'
 
-from processing.tools.dataobjects import *          # NOQA
-from processing.tools.general import *              # NOQA
-from processing.tools.vector import *               # NOQA
-from processing.tools.raster import *               # NOQA
-from processing.tools.system import *               # NOQA
-#from processing.tests.TestData import loadTestData  # NOQA
+import os.path
+from qgis.PyQt.QtGui import QIcon
+from processing.core.AlgorithmProvider import AlgorithmProvider
+from processing.modeler.CalculatorModelerAlgorithm import CalculatorModelerAlgorithm
+from processing.modeler.RasterLayerBoundsAlgorithm import RasterLayerBoundsAlgorithm
+from processing.modeler.VectorLayerBoundsAlgorithm import VectorLayerBoundsAlgorithm
+
+pluginPath = os.path.split(os.path.dirname(__file__))[0]
 
 
-#def classFactory(iface):
-#    from processing.ProcessingPlugin import ProcessingPlugin
-#    return ProcessingPlugin(iface)
+class ModelerOnlyAlgorithmProvider(AlgorithmProvider):
+
+    def __init__(self):
+        AlgorithmProvider.__init__(self)
+
+    def getName(self):
+        return 'modelertools'
+
+    def getDescription(self):
+        return self.tr('Modeler-only tools', 'ModelerOnlyAlgorithmProvider')
+
+    def getIcon(self):
+        return QIcon(os.path.join(pluginPath, 'images', 'model.png'))
+
+    def _loadAlgorithms(self):
+        self.algs = [CalculatorModelerAlgorithm(),
+                     RasterLayerBoundsAlgorithm(),
+                     VectorLayerBoundsAlgorithm()]
+        for alg in self.algs:
+            alg.provider = self
