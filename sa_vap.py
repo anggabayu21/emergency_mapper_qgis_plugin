@@ -1801,7 +1801,7 @@ class SaVap:
 
         if self.analysis_content != '':
             self.result_lbl = "Result"
-            self.analysis_content = "<div style='font-size:4px;'>" + self.analysis_content + "</div>"
+            self.analysis_content = "<div style='font-size:12px;'>" + self.analysis_content + "</div>"
         else:
             self.result_lbl = ""             
 
